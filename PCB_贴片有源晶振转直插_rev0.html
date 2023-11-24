@@ -1,0 +1,4613 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive BOM for KiCAD</title>
+  <style type="text/css">
+:root {
+  --pcb-edge-color: black;
+  --pad-color: #878787;
+  --pad-hole-color: #CCCCCC;
+  --pad-color-highlight: #D04040;
+  --pin1-outline-color: #ffb629;
+  --pin1-outline-color-highlight: #b4ff03;
+  --silkscreen-edge-color: #aa4;
+  --silkscreen-polygon-color: #4aa;
+  --silkscreen-text-color: #4aa;
+  --fabrication-edge-color: #907651;
+  --fabrication-polygon-color: #907651;
+  --fabrication-text-color: #a27c24;
+  --track-color: #def5f1;
+  --track-color-highlight: #D04040;
+  --zone-color: #def5f1;
+  --zone-color-highlight: #d0404080;
+}
+
+html, body {
+  margin: 0px;
+  height: 100%;
+  font-family: Verdana, sans-serif;
+}
+
+.dark.topmostdiv {
+  --pcb-edge-color: #eee;
+  --pad-color: #808080;
+  --pin1-outline-color: #ffa800;
+  --pin1-outline-color-highlight: #ccff00;
+  --track-color: #42524f;
+  --zone-color: #42524f;
+  background-color: #252c30;
+  color: #eee;
+}
+
+button {
+  background-color: #eee;
+  border: 1px solid #888;
+  color: black;
+  height: 44px;
+  width: 44px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  font-weight: bolder;
+}
+
+.dark button {
+  /* This will be inverted */
+  background-color: #c3b7b5;
+}
+
+button.depressed {
+  background-color: #0a0;
+  color: white;
+}
+
+.dark button.depressed {
+  /* This will be inverted */
+  background-color: #b3b;
+}
+
+button:focus {
+  outline: 0;
+}
+
+button#tb-btn {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8.47 8.47'%3E%3Crect transform='translate(0 -288.53)' ry='1.17' y='288.8' x='.27' height='7.94' width='7.94' fill='%23f9f9f9'/%3E%3Cg transform='translate(0 -288.53)'%3E%3Crect width='7.94' height='7.94' x='.27' y='288.8' ry='1.17' fill='none' stroke='%23000' stroke-width='.4' stroke-linejoin='round'/%3E%3Cpath d='M1.32 290.12h5.82M1.32 291.45h5.82' fill='none' stroke='%23000' stroke-width='.4'/%3E%3Cpath d='M4.37 292.5v4.23M.26 292.63H8.2' fill='none' stroke='%23000' stroke-width='.3'/%3E%3Ctext font-weight='700' font-size='3.17' font-family='sans-serif'%3E%3Ctspan x='1.35' y='295.73'%3EF%3C/tspan%3E%3Ctspan x='5.03' y='295.68'%3EB%3C/tspan%3E%3C/text%3E%3C/g%3E%3C/svg%3E%0A");
+}
+
+button#lr-btn {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8.47 8.47'%3E%3Crect transform='translate(0 -288.53)' ry='1.17' y='288.8' x='.27' height='7.94' width='7.94' fill='%23f9f9f9'/%3E%3Cg transform='translate(0 -288.53)'%3E%3Crect width='7.94' height='7.94' x='.27' y='288.8' ry='1.17' fill='none' stroke='%23000' stroke-width='.4' stroke-linejoin='round'/%3E%3Cpath d='M1.06 290.12H3.7m-2.64 1.33H3.7m-2.64 1.32H3.7m-2.64 1.3H3.7m-2.64 1.33H3.7' fill='none' stroke='%23000' stroke-width='.4'/%3E%3Cpath d='M4.37 288.8v7.94m0-4.11h3.96' fill='none' stroke='%23000' stroke-width='.3'/%3E%3Ctext font-weight='700' font-size='3.17' font-family='sans-serif'%3E%3Ctspan x='5.11' y='291.96'%3EF%3C/tspan%3E%3Ctspan x='5.03' y='295.68'%3EB%3C/tspan%3E%3C/text%3E%3C/g%3E%3C/svg%3E%0A");
+}
+
+button#bom-btn {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8.47 8.47'%3E%3Crect transform='translate(0 -288.53)' ry='1.17' y='288.8' x='.27' height='7.94' width='7.94' fill='%23f9f9f9'/%3E%3Cg transform='translate(0 -288.53)' fill='none' stroke='%23000' stroke-width='.4'%3E%3Crect width='7.94' height='7.94' x='.27' y='288.8' ry='1.17' stroke-linejoin='round'/%3E%3Cpath d='M1.59 290.12h5.29M1.59 291.45h5.33M1.59 292.75h5.33M1.59 294.09h5.33M1.59 295.41h5.33'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+button#bom-grouped-btn {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cg stroke='%23000' stroke-linejoin='round' class='layer'%3E%3Crect width='29' height='29' x='1.5' y='1.5' stroke-width='2' fill='%23fff' rx='5' ry='5'/%3E%3Cpath stroke-linecap='square' stroke-width='2' d='M6 10h4m4 0h5m4 0h3M6.1 22h3m3.9 0h5m4 0h4m-16-8h4m4 0h4'/%3E%3Cpath stroke-linecap='null' d='M5 17.5h22M5 26.6h22M5 5.5h22'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+button#bom-ungrouped-btn {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cg stroke='%23000' stroke-linejoin='round' class='layer'%3E%3Crect width='29' height='29' x='1.5' y='1.5' stroke-width='2' fill='%23fff' rx='5' ry='5'/%3E%3Cpath stroke-linecap='square' stroke-width='2' d='M6 10h4m-4 8h3m-3 8h4'/%3E%3Cpath stroke-linecap='null' d='M5 13.5h22m-22 8h22M5 5.5h22'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+button#bom-netlist-btn {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cg fill='none' stroke='%23000' class='layer'%3E%3Crect width='29' height='29' x='1.5' y='1.5' stroke-width='2' fill='%23fff' rx='5' ry='5'/%3E%3Cpath stroke-width='2' d='M6 26l6-6v-8m13.8-6.3l-6 6v8'/%3E%3Ccircle cx='11.8' cy='9.5' r='2.8' stroke-width='2'/%3E%3Ccircle cx='19.8' cy='22.8' r='2.8' stroke-width='2'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+button#copy {
+  background-image: url("data:image/svg+xml,%3Csvg height='48' viewBox='0 0 48 48' width='48' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h48v48h-48z' fill='none'/%3E%3Cpath d='M32 2h-24c-2.21 0-4 1.79-4 4v28h4v-28h24v-4zm6 8h-22c-2.21 0-4 1.79-4 4v28c0 2.21 1.79 4 4 4h22c2.21 0 4-1.79 4-4v-28c0-2.21-1.79-4-4-4zm0 32h-22v-28h22v28z'/%3E%3C/svg%3E");
+  background-position: 6px 6px;
+  background-repeat: no-repeat;
+  background-size: 26px 26px;
+  border-radius: 6px;
+  height: 40px;
+  width: 40px;
+  margin: 10px 5px;
+}
+
+button#copy:active {
+    box-shadow: inset 0px 0px 5px #6c6c6c;
+}
+
+textarea.clipboard-temp {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 2em;
+  height: 2em;
+  padding: 0;
+  border: None;
+  outline: None;
+  box-shadow: None;
+  background: transparent;
+}
+
+.left-most-button {
+  border-right: 0;
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+}
+
+.middle-button {
+  border-right: 0;
+}
+
+.right-most-button {
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+.button-container {
+  font-size: 0;
+  margin: 10px 10px 10px 0px;
+}
+
+.dark .button-container {
+  filter: invert(1);
+}
+
+.button-container button {
+  background-size: 32px 32px;
+  background-position: 5px 5px;
+  background-repeat: no-repeat;
+}
+
+@media print {
+  .hideonprint {
+    display: none;
+  }
+}
+
+canvas {
+  cursor: crosshair;
+}
+
+canvas:active {
+  cursor: grabbing;
+}
+
+.fileinfo {
+  width: 100%;
+  max-width: 1000px;
+  border: none;
+  padding: 5px;
+}
+
+.fileinfo .title {
+  font-size: 20pt;
+  font-weight: bold;
+}
+
+.fileinfo td {
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 1px;
+  width: 50%;
+  text-overflow: ellipsis;
+}
+
+.bom {
+  border-collapse: collapse;
+  font-family: Consolas, "DejaVu Sans Mono", Monaco, monospace;
+  font-size: 10pt;
+  table-layout: fixed;
+  width: 100%;
+  margin-top: 1px;
+}
+
+.bom th, .bom td {
+  border: 1px solid black;
+  padding: 5px;
+  word-wrap: break-word;
+  text-align: center;
+  position: relative;
+}
+
+.dark .bom th, .dark .bom td {
+  border: 1px solid #777;
+}
+
+.bom th {
+  background-color: #CCCCCC;
+  background-clip: padding-box;
+}
+
+.dark .bom th {
+  background-color: #3b4749;
+}
+
+.bom tr.highlighted:nth-child(n) {
+  background-color: #cfc;
+}
+
+.dark .bom tr.highlighted:nth-child(n) {
+  background-color: #226022;
+}
+
+.bom tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.dark .bom tr:nth-child(even) {
+  background-color: #313b40;
+}
+
+.bom tr.checked {
+  color: #aaa;
+}
+
+.dark .bom tr.checked {
+  color: #666;
+}
+
+.bom tr {
+  transition: background-color 0.2s;
+}
+
+.bom .numCol {
+  width: 25px;
+}
+
+.bom .Description {
+  width: 10%;
+}
+
+.bom .Part {
+  width: 10%;
+}
+
+.bom .Value {
+  width: 15%;
+}
+
+.bom .Quantity {
+  width: 65px;
+}
+
+.bom th .sortmark {
+  position: absolute;
+  right: 1px;
+  top: 1px;
+  margin-top: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent #221 transparent;
+  transform-origin: 50% 85%;
+  transition: opacity 0.2s, transform 0.4s;
+}
+
+.dark .bom th .sortmark {
+  filter: invert(1);
+}
+
+.bom th .sortmark.none {
+  opacity: 0;
+}
+
+.bom th .sortmark.desc {
+  transform: rotate(180deg);
+}
+
+.bom th:hover .sortmark.none {
+  opacity: 0.5;
+}
+
+.bom .bom-checkbox {
+  width: 30px;
+  position: relative;
+  user-select: none;
+  -moz-user-select: none;
+}
+
+.bom .bom-checkbox:before {
+  content: "";
+  position: absolute;
+  border-width: 15px;
+  border-style: solid;
+  border-color: #51829f transparent transparent transparent;
+  visibility: hidden;
+  top: -15px;
+}
+
+.bom .bom-checkbox:after {
+  content: "Double click to set/unset all";
+  position: absolute;
+  color: white;
+  top: -35px;
+  left: -26px;
+  background: #51829f;
+  padding: 5px 15px;
+  border-radius: 8px;
+  white-space: nowrap;
+  visibility: hidden;
+}
+
+.bom .bom-checkbox:hover:before, .bom .bom-checkbox:hover:after {
+  visibility: visible;
+  transition: visibility 0.2s linear 1s;
+}
+
+.split {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: inherit;
+}
+
+.split.split-horizontal, .gutter.gutter-horizontal {
+  height: 100%;
+  float: left;
+}
+
+.gutter {
+  background-color: #ddd;
+  background-repeat: no-repeat;
+  background-position: 50%;
+  transition: background-color 0.3s;
+}
+
+.dark .gutter {
+  background-color: #777;
+}
+
+.gutter.gutter-horizontal {
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
+  cursor: ew-resize;
+  width: 5px;
+}
+
+.gutter.gutter-vertical {
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=');
+  cursor: ns-resize;
+  height: 5px;
+}
+
+.searchbox {
+  float: left;
+  height: 40px;
+  margin: 10px 5px;
+  padding: 12px 32px;
+  font-family: Consolas, "DejaVu Sans Mono", Monaco, monospace;
+  font-size: 18px;
+  box-sizing: border-box;
+  border: 1px solid #888;
+  border-radius: 6px;
+  outline: none;
+  background-color: #eee;
+  transition: background-color 0.2s, border 0.2s;
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABNklEQVQ4T8XSMUvDQBQH8P/LElFa/AIZHcTBQSz0I/gFstTBRR2KUC4ldDxw7h0Bl3RRUATxi4iiODgoiLNrbQYp5J6cpJJqomkX33Z37/14d/dIa33MzDuYI4johOI4XhyNRteO46zNYjDzAxE1yBZprVeZ+QbAUhXEGJMA2Ox2u4+fQIa0mPmsCgCgJYQ4t7lfgF0opQYAdv9ABkKI/UnOFCClXKjX61cA1osQY8x9kiRNKeV7IWA3oyhaSdP0FkAtjxhj3hzH2RBCPOf3pzqYHCilfAAX+URm9oMguPzeWSGQvUcMYC8rOBJCHBRdqxTo9/vbRHRqi8bj8XKv1xvODbiuW2u32/bvf0SlDv4XYOY7z/Mavu+nM1+BmQ+NMc0wDF/LprP0DbTWW0T00ul0nn4b7Q87+X4Qmfiq2wAAAABJRU5ErkJggg==');
+  background-position: 10px 10px;
+  background-repeat: no-repeat;
+}
+
+.dark .searchbox {
+  background-color: #111;
+  color: #eee;
+}
+
+.searchbox::placeholder {
+  color: #ccc;
+}
+
+.dark .searchbox::placeholder {
+  color: #666;
+}
+
+.filter {
+  width: calc(60% - 64px);
+}
+
+.reflookup {
+  width: calc(40% - 10px);
+}
+
+input[type=text]:focus {
+  background-color: white;
+  border: 1px solid #333;
+}
+
+.dark input[type=text]:focus {
+  background-color: #333;
+  border: 1px solid #ccc;
+}
+
+mark.highlight {
+  background-color: #5050ff;
+  color: #fff;
+  padding: 2px;
+  border-radius: 6px;
+}
+
+.dark mark.highlight {
+  background-color: #76a6da;
+  color: #111;
+}
+
+.menubtn {
+  background-color: white;
+  border: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 20 20'%3E%3Cpath fill='none' d='M0 0h20v20H0V0z'/%3E%3Cpath d='M15.95 10.78c.03-.25.05-.51.05-.78s-.02-.53-.06-.78l1.69-1.32c.15-.12.19-.34.1-.51l-1.6-2.77c-.1-.18-.31-.24-.49-.18l-1.99.8c-.42-.32-.86-.58-1.35-.78L12 2.34c-.03-.2-.2-.34-.4-.34H8.4c-.2 0-.36.14-.39.34l-.3 2.12c-.49.2-.94.47-1.35.78l-1.99-.8c-.18-.07-.39 0-.49.18l-1.6 2.77c-.1.18-.06.39.1.51l1.69 1.32c-.04.25-.07.52-.07.78s.02.53.06.78L2.37 12.1c-.15.12-.19.34-.1.51l1.6 2.77c.1.18.31.24.49.18l1.99-.8c.42.32.86.58 1.35.78l.3 2.12c.04.2.2.34.4.34h3.2c.2 0 .37-.14.39-.34l.3-2.12c.49-.2.94-.47 1.35-.78l1.99.8c.18.07.39 0 .49-.18l1.6-2.77c.1-.18.06-.39-.1-.51l-1.67-1.32zM10 13c-1.65 0-3-1.35-3-3s1.35-3 3-3 3 1.35 3 3-1.35 3-3 3z'/%3E%3C/svg%3E%0A");
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.statsbtn {
+  background-color: white;
+  border: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='36' height='36' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 6h28v24H4V6zm0 8h28v8H4m9-16v24h10V5.8' fill='none' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E");
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.iobtn {
+  background-color: white;
+  border: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Cpath fill='none' stroke='%23000' stroke-width='2' d='M3 33v-7l6.8-7h16.5l6.7 7v7H3zM3.2 26H33M21 9l5-5.9 5 6h-2.5V15h-5V9H21zm-4.9 0l-5 6-5-6h2.5V3h5v6h2.5z'/%3E%3Cpath fill='none' stroke='%23000' d='M6.1 29.5H10'/%3E%3C/svg%3E");
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.dark .statsbtn, .dark .savebtn, .dark .menubtn, .dark .iobtn {
+  filter: invert(1);
+}
+
+.flexbox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.savebtn {
+  background-color: #d6d6d6;
+  width: auto;
+  height: 30px;
+  flex-grow: 1;
+  margin: 5px;
+  border-radius: 4px;
+}
+
+.savebtn:active {
+  background-color: #0a0;
+  color: white;
+}
+
+.dark .savebtn:active {
+  /* This will be inverted */
+  background-color: #b3b;
+}
+
+.stats {
+  border-collapse: collapse;
+  font-size: 12pt;
+  table-layout: fixed;
+  width: 100%;
+  min-width: 450px;
+}
+
+.dark .stats td {
+  border: 1px solid #bbb;
+}
+
+.stats td {
+  border: 1px solid black;
+  padding: 5px;
+  word-wrap: break-word;
+  text-align: center;
+  position: relative;
+}
+
+#checkbox-stats div {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#checkbox-stats .bar {
+  background-color: rgba(28, 251, 0, 0.6);
+}
+
+.menu {
+  position: relative;
+  display: inline-block;
+  margin: 10px 10px 10px 0px;
+}
+
+.menu-content {
+  display: none;
+  position: absolute;
+  background-color: white;
+  right: 0;
+  min-width: 300px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+  padding: 8px;
+}
+
+.dark .menu-content {
+  background-color: #111;
+}
+
+.menu:hover .menu-content {
+  display: block;
+}
+
+.menu:hover .menubtn, .menu:hover .iobtn, .menu:hover .statsbtn {
+  background-color: #eee;
+}
+
+.menu-label {
+  display: inline-block;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-top: 0;
+  width: calc(100% - 18px);
+}
+
+.menu-label-top {
+  border-top: 1px solid #ccc;
+}
+
+.menu-textbox {
+  float: left;
+  height: 24px;
+  margin: 10px 5px;
+  padding: 5px 5px;
+  font-family: Consolas, "DejaVu Sans Mono", Monaco, monospace;
+  font-size: 14px;
+  box-sizing: border-box;
+  border: 1px solid #888;
+  border-radius: 4px;
+  outline: none;
+  background-color: #eee;
+  transition: background-color 0.2s, border 0.2s;
+  width: calc(100% - 10px);
+}
+
+.menu-textbox.invalid, .dark .menu-textbox.invalid {
+  color: red;
+}
+
+.dark .menu-textbox {
+  background-color: #222;
+  color: #eee;
+}
+
+.radio-container {
+  margin: 4px;
+}
+
+.topmostdiv {
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  transition: background-color 0.3s;
+}
+
+#top {
+  height: 78px;
+  border-bottom: 2px solid black;
+}
+
+.dark #top {
+  border-bottom: 2px solid #ccc;
+}
+
+#dbg {
+  display: block;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #aaa;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #666;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  margin: 3px 0;
+  padding: 0;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+  border-radius: 3px;
+}
+
+.slider:hover {
+  opacity: 1;
+}
+
+.slider:focus {
+  outline: none;
+}
+
+.slider::-webkit-slider-runnable-track {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 8px;
+  background: #d3d3d3;
+  border-radius: 3px;
+  border: none;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #0a0;
+  cursor: pointer;
+  margin-top: -4px;
+}
+
+.dark .slider::-webkit-slider-thumb {
+  background: #3d3;
+}
+
+.slider::-moz-range-thumb {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #0a0;
+  cursor: pointer;
+}
+
+.slider::-moz-range-track {
+  height: 8px;
+  background: #d3d3d3;
+  border-radius: 3px;
+}
+
+.dark .slider::-moz-range-thumb {
+  background: #3d3;
+}
+
+.slider::-ms-track {
+  width: 100%;
+  height: 8px;
+  border-width: 3px 0;
+  background: transparent;
+  border-color: transparent;
+  color: transparent;
+  transition: opacity .2s;
+}
+
+.slider::-ms-fill-lower {
+  background: #d3d3d3;
+  border: none;
+  border-radius: 3px;
+}
+
+.slider::-ms-fill-upper {
+  background: #d3d3d3;
+  border: none;
+  border-radius: 3px;
+}
+
+.slider::-ms-thumb {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #0a0;
+  cursor: pointer;
+  margin: 0;
+}
+
+.shameless-plug {
+  font-size: 0.8em;
+  text-align: center;
+  display: block;
+}
+
+a {
+  color: #0278a4;
+}
+
+.dark a {
+  color: #00b9fd;
+}
+
+#frontcanvas, #backcanvas {
+    touch-action: none;
+}
+
+ 
+  </style>
+  <script type="text/javascript" >
+///////////////////////////////////////////////
+/*
+  Split.js - v1.3.5
+  MIT License
+  https://github.com/nathancahill/Split.js
+*/
+!function(e,t){"object"==typeof exports&&"undefined"!=typeof module?module.exports=t():"function"==typeof define&&define.amd?define(t):e.Split=t()}(this,function(){"use strict";var e=window,t=e.document,n="addEventListener",i="removeEventListener",r="getBoundingClientRect",s=function(){return!1},o=e.attachEvent&&!e[n],a=["","-webkit-","-moz-","-o-"].filter(function(e){var n=t.createElement("div");return n.style.cssText="width:"+e+"calc(9px)",!!n.style.length}).shift()+"calc",l=function(e){return"string"==typeof e||e instanceof String?t.querySelector(e):e};return function(u,c){function z(e,t,n){var i=A(y,t,n);Object.keys(i).forEach(function(t){return e.style[t]=i[t]})}function h(e,t){var n=B(y,t);Object.keys(n).forEach(function(t){return e.style[t]=n[t]})}function f(e){var t=E[this.a],n=E[this.b],i=t.size+n.size;t.size=e/this.size*i,n.size=i-e/this.size*i,z(t.element,t.size,this.aGutterSize),z(n.element,n.size,this.bGutterSize)}function m(e){var t;this.dragging&&((t="touches"in e?e.touches[0][b]-this.start:e[b]-this.start)<=E[this.a].minSize+M+this.aGutterSize?t=E[this.a].minSize+this.aGutterSize:t>=this.size-(E[this.b].minSize+M+this.bGutterSize)&&(t=this.size-(E[this.b].minSize+this.bGutterSize)),f.call(this,t),c.onDrag&&c.onDrag())}function g(){var e=E[this.a].element,t=E[this.b].element;this.size=e[r]()[y]+t[r]()[y]+this.aGutterSize+this.bGutterSize,this.start=e[r]()[G]}function d(){var t=this,n=E[t.a].element,r=E[t.b].element;t.dragging&&c.onDragEnd&&c.onDragEnd(),t.dragging=!1,e[i]("mouseup",t.stop),e[i]("touchend",t.stop),e[i]("touchcancel",t.stop),t.parent[i]("mousemove",t.move),t.parent[i]("touchmove",t.move),delete t.stop,delete t.move,n[i]("selectstart",s),n[i]("dragstart",s),r[i]("selectstart",s),r[i]("dragstart",s),n.style.userSelect="",n.style.webkitUserSelect="",n.style.MozUserSelect="",n.style.pointerEvents="",r.style.userSelect="",r.style.webkitUserSelect="",r.style.MozUserSelect="",r.style.pointerEvents="",t.gutter.style.cursor="",t.parent.style.cursor=""}function S(t){var i=this,r=E[i.a].element,o=E[i.b].element;!i.dragging&&c.onDragStart&&c.onDragStart(),t.preventDefault(),i.dragging=!0,i.move=m.bind(i),i.stop=d.bind(i),e[n]("mouseup",i.stop),e[n]("touchend",i.stop),e[n]("touchcancel",i.stop),i.parent[n]("mousemove",i.move),i.parent[n]("touchmove",i.move),r[n]("selectstart",s),r[n]("dragstart",s),o[n]("selectstart",s),o[n]("dragstart",s),r.style.userSelect="none",r.style.webkitUserSelect="none",r.style.MozUserSelect="none",r.style.pointerEvents="none",o.style.userSelect="none",o.style.webkitUserSelect="none",o.style.MozUserSelect="none",o.style.pointerEvents="none",i.gutter.style.cursor=j,i.parent.style.cursor=j,g.call(i)}function v(e){e.forEach(function(t,n){if(n>0){var i=F[n-1],r=E[i.a],s=E[i.b];r.size=e[n-1],s.size=t,z(r.element,r.size,i.aGutterSize),z(s.element,s.size,i.bGutterSize)}})}function p(){F.forEach(function(e){e.parent.removeChild(e.gutter),E[e.a].element.style[y]="",E[e.b].element.style[y]=""})}void 0===c&&(c={});var y,b,G,E,w=l(u[0]).parentNode,D=e.getComputedStyle(w).flexDirection,U=c.sizes||u.map(function(){return 100/u.length}),k=void 0!==c.minSize?c.minSize:100,x=Array.isArray(k)?k:u.map(function(){return k}),L=void 0!==c.gutterSize?c.gutterSize:10,M=void 0!==c.snapOffset?c.snapOffset:30,O=c.direction||"horizontal",j=c.cursor||("horizontal"===O?"ew-resize":"ns-resize"),C=c.gutter||function(e,n){var i=t.createElement("div");return i.className="gutter gutter-"+n,i},A=c.elementStyle||function(e,t,n){var i={};return"string"==typeof t||t instanceof String?i[e]=t:i[e]=o?t+"%":a+"("+t+"% - "+n+"px)",i},B=c.gutterStyle||function(e,t){return n={},n[e]=t+"px",n;var n};"horizontal"===O?(y="width","clientWidth",b="clientX",G="left","paddingLeft"):"vertical"===O&&(y="height","clientHeight",b="clientY",G="top","paddingTop");var F=[];return E=u.map(function(e,t){var i,s={element:l(e),size:U[t],minSize:x[t]};if(t>0&&(i={a:t-1,b:t,dragging:!1,isFirst:1===t,isLast:t===u.length-1,direction:O,parent:w},i.aGutterSize=L,i.bGutterSize=L,i.isFirst&&(i.aGutterSize=L/2),i.isLast&&(i.bGutterSize=L/2),"row-reverse"===D||"column-reverse"===D)){var a=i.a;i.a=i.b,i.b=a}if(!o&&t>0){var c=C(t,O);h(c,L),c[n]("mousedown",S.bind(i)),c[n]("touchstart",S.bind(i)),w.insertBefore(c,s.element),i.gutter=c}0===t||t===u.length-1?z(s.element,s.size,L/2):z(s.element,s.size,L);var f=s.element[r]()[y];return f<s.minSize&&(s.minSize=f),t>0&&F.push(i),s}),o?{setSizes:v,destroy:p}:{setSizes:v,getSizes:function(){return E.map(function(e){return e.size})},collapse:function(e){if(e===F.length){var t=F[e-1];g.call(t),o||f.call(t,t.size-t.bGutterSize)}else{var n=F[e];g.call(n),o||f.call(n,n.aGutterSize)}},destroy:p}}});
+
+///////////////////////////////////////////////
+
+///////////////////////////////////////////////
+// Copyright (c) 2013 Pieroxy <pieroxy@pieroxy.net>
+// This work is free. You can redistribute it and/or modify it
+// under the terms of the WTFPL, Version 2
+// For more information see LICENSE.txt or http://www.wtfpl.net/
+//
+// For more information, the home page:
+// http://pieroxy.net/blog/pages/lz-string/testing.html
+//
+// LZ-based compression algorithm, version 1.4.4
+var LZString=function(){var o=String.fromCharCode,i={};var n={decompressFromBase64:function(o){return null==o?"":""==o?null:n._decompress(o.length,32,function(n){return function(o,n){if(!i[o]){i[o]={};for(var t=0;t<o.length;t++)i[o][o.charAt(t)]=t}return i[o][n]}("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",o.charAt(n))})},_decompress:function(i,n,t){var r,e,a,s,p,u,l,f=[],c=4,d=4,h=3,v="",g=[],m={val:t(0),position:n,index:1};for(r=0;r<3;r+=1)f[r]=r;for(a=0,p=Math.pow(2,2),u=1;u!=p;)s=m.val&m.position,m.position>>=1,0==m.position&&(m.position=n,m.val=t(m.index++)),a|=(s>0?1:0)*u,u<<=1;switch(a){case 0:for(a=0,p=Math.pow(2,8),u=1;u!=p;)s=m.val&m.position,m.position>>=1,0==m.position&&(m.position=n,m.val=t(m.index++)),a|=(s>0?1:0)*u,u<<=1;l=o(a);break;case 1:for(a=0,p=Math.pow(2,16),u=1;u!=p;)s=m.val&m.position,m.position>>=1,0==m.position&&(m.position=n,m.val=t(m.index++)),a|=(s>0?1:0)*u,u<<=1;l=o(a);break;case 2:return""}for(f[3]=l,e=l,g.push(l);;){if(m.index>i)return"";for(a=0,p=Math.pow(2,h),u=1;u!=p;)s=m.val&m.position,m.position>>=1,0==m.position&&(m.position=n,m.val=t(m.index++)),a|=(s>0?1:0)*u,u<<=1;switch(l=a){case 0:for(a=0,p=Math.pow(2,8),u=1;u!=p;)s=m.val&m.position,m.position>>=1,0==m.position&&(m.position=n,m.val=t(m.index++)),a|=(s>0?1:0)*u,u<<=1;f[d++]=o(a),l=d-1,c--;break;case 1:for(a=0,p=Math.pow(2,16),u=1;u!=p;)s=m.val&m.position,m.position>>=1,0==m.position&&(m.position=n,m.val=t(m.index++)),a|=(s>0?1:0)*u,u<<=1;f[d++]=o(a),l=d-1,c--;break;case 2:return g.join("")}if(0==c&&(c=Math.pow(2,h),h++),f[l])v=f[l];else{if(l!==d)return null;v=e+e.charAt(0)}g.push(v),f[d++]=e+v.charAt(0),e=v,0==--c&&(c=Math.pow(2,h),h++)}}};return n}();"function"==typeof define&&define.amd?define(function(){return LZString}):"undefined"!=typeof module&&null!=module?module.exports=LZString:"undefined"!=typeof angular&&null!=angular&&angular.module("LZString",[]).factory("LZString",function(){return LZString});
+///////////////////////////////////////////////
+
+///////////////////////////////////////////////
+/*!
+ * PEP v0.4.3 | https://github.com/jquery/PEP
+ * Copyright jQuery Foundation and other contributors | http://jquery.org/license
+ */
+! function (a, b) {
+  "object" == typeof exports && "undefined" != typeof module ? module.exports = b() : "function" == typeof define && define.amd ? define(b) : a.PointerEventsPolyfill = b()
+}(this, function () {
+  "use strict";
+
+  function a(a, b) {
+    b = b || Object.create(null);
+    var c = document.createEvent("Event");
+    c.initEvent(a, b.bubbles || !1, b.cancelable || !1);
+    for (var d, e = 2; e < m.length; e++) d = m[e], c[d] = b[d] || n[e];
+    c.buttons = b.buttons || 0;
+    var f = 0;
+    return f = b.pressure && c.buttons ? b.pressure : c.buttons ? .5 : 0, c.x = c.clientX, c.y = c.clientY, c.pointerId = b.pointerId || 0, c.width = b.width || 0, c.height = b.height || 0, c.pressure = f, c.tiltX = b.tiltX || 0, c.tiltY = b.tiltY || 0, c.twist = b.twist || 0, c.tangentialPressure = b.tangentialPressure || 0, c.pointerType = b.pointerType || "", c.hwTimestamp = b.hwTimestamp || 0, c.isPrimary = b.isPrimary || !1, c
+  }
+
+  function b() {
+    this.array = [], this.size = 0
+  }
+
+  function c(a, b, c, d) {
+    this.addCallback = a.bind(d), this.removeCallback = b.bind(d), this.changedCallback = c.bind(d), A && (this.observer = new A(this.mutationWatcher.bind(this)))
+  }
+
+  function d(a) {
+    return "body /shadow-deep/ " + e(a)
+  }
+
+  function e(a) {
+    return '[touch-action="' + a + '"]'
+  }
+
+  function f(a) {
+    return "{ -ms-touch-action: " + a + "; touch-action: " + a + "; }"
+  }
+
+  function g() {
+    if (F) {
+      D.forEach(function (a) {
+        String(a) === a ? (E += e(a) + f(a) + "\n", G && (E += d(a) + f(a) + "\n")) : (E += a.selectors.map(e) + f(a.rule) + "\n", G && (E += a.selectors.map(d) + f(a.rule) + "\n"))
+      });
+      var a = document.createElement("style");
+      a.textContent = E, document.head.appendChild(a)
+    }
+  }
+
+  function h() {
+    if (!window.PointerEvent) {
+      if (window.PointerEvent = a, window.navigator.msPointerEnabled) {
+        var b = window.navigator.msMaxTouchPoints;
+        Object.defineProperty(window.navigator, "maxTouchPoints", {
+          value: b,
+          enumerable: !0
+        }), u.registerSource("ms", _)
+      } else Object.defineProperty(window.navigator, "maxTouchPoints", {
+        value: 0,
+        enumerable: !0
+      }), u.registerSource("mouse", N), void 0 !== window.ontouchstart && u.registerSource("touch", V);
+      u.register(document)
+    }
+  }
+
+  function i(a) {
+    if (!u.pointermap.has(a)) {
+      var b = new Error("InvalidPointerId");
+      throw b.name = "InvalidPointerId", b
+    }
+  }
+
+  function j(a) {
+    for (var b = a.parentNode; b && b !== a.ownerDocument;) b = b.parentNode;
+    if (!b) {
+      var c = new Error("InvalidStateError");
+      throw c.name = "InvalidStateError", c
+    }
+  }
+
+  function k(a) {
+    var b = u.pointermap.get(a);
+    return 0 !== b.buttons
+  }
+
+  function l() {
+    window.Element && !Element.prototype.setPointerCapture && Object.defineProperties(Element.prototype, {
+      setPointerCapture: {
+        value: W
+      },
+      releasePointerCapture: {
+        value: X
+      },
+      hasPointerCapture: {
+        value: Y
+      }
+    })
+  }
+  var m = ["bubbles", "cancelable", "view", "detail", "screenX", "screenY", "clientX", "clientY", "ctrlKey", "altKey", "shiftKey", "metaKey", "button", "relatedTarget", "pageX", "pageY"],
+    n = [!1, !1, null, null, 0, 0, 0, 0, !1, !1, !1, !1, 0, null, 0, 0],
+    o = window.Map && window.Map.prototype.forEach,
+    p = o ? Map : b;
+  b.prototype = {
+    set: function (a, b) {
+      return void 0 === b ? this["delete"](a) : (this.has(a) || this.size++, void(this.array[a] = b))
+    },
+    has: function (a) {
+      return void 0 !== this.array[a]
+    },
+    "delete": function (a) {
+      this.has(a) && (delete this.array[a], this.size--)
+    },
+    get: function (a) {
+      return this.array[a]
+    },
+    clear: function () {
+      this.array.length = 0, this.size = 0
+    },
+    forEach: function (a, b) {
+      return this.array.forEach(function (c, d) {
+        a.call(b, c, d, this)
+      }, this)
+    }
+  };
+  var q = ["bubbles", "cancelable", "view", "detail", "screenX", "screenY", "clientX", "clientY", "ctrlKey", "altKey", "shiftKey", "metaKey", "button", "relatedTarget", "buttons", "pointerId", "width", "height", "pressure", "tiltX", "tiltY", "pointerType", "hwTimestamp", "isPrimary", "type", "target", "currentTarget", "which", "pageX", "pageY", "timeStamp"],
+    r = [!1, !1, null, null, 0, 0, 0, 0, !1, !1, !1, !1, 0, null, 0, 0, 0, 0, 0, 0, 0, "", 0, !1, "", null, null, 0, 0, 0, 0],
+    s = {
+      pointerover: 1,
+      pointerout: 1,
+      pointerenter: 1,
+      pointerleave: 1
+    },
+    t = "undefined" != typeof SVGElementInstance,
+    u = {
+      pointermap: new p,
+      eventMap: Object.create(null),
+      captureInfo: Object.create(null),
+      eventSources: Object.create(null),
+      eventSourceList: [],
+      registerSource: function (a, b) {
+        var c = b,
+          d = c.events;
+        d && (d.forEach(function (a) {
+          c[a] && (this.eventMap[a] = c[a].bind(c))
+        }, this), this.eventSources[a] = c, this.eventSourceList.push(c))
+      },
+      register: function (a) {
+        for (var b, c = this.eventSourceList.length, d = 0; d < c && (b = this.eventSourceList[d]); d++)
+          b.register.call(b, a)
+      },
+      unregister: function (a) {
+        for (var b, c = this.eventSourceList.length, d = 0; d < c && (b = this.eventSourceList[d]); d++)
+          b.unregister.call(b, a)
+      },
+      contains: function (a, b) {
+        try {
+          return a.contains(b)
+        } catch (c) {
+          return !1
+        }
+      },
+      down: function (a) {
+        a.bubbles = !0, this.fireEvent("pointerdown", a)
+      },
+      move: function (a) {
+        a.bubbles = !0, this.fireEvent("pointermove", a)
+      },
+      up: function (a) {
+        a.bubbles = !0, this.fireEvent("pointerup", a)
+      },
+      enter: function (a) {
+        a.bubbles = !1, this.fireEvent("pointerenter", a)
+      },
+      leave: function (a) {
+        a.bubbles = !1, this.fireEvent("pointerleave", a)
+      },
+      over: function (a) {
+        a.bubbles = !0, this.fireEvent("pointerover", a)
+      },
+      out: function (a) {
+        a.bubbles = !0, this.fireEvent("pointerout", a)
+      },
+      cancel: function (a) {
+        a.bubbles = !0, this.fireEvent("pointercancel", a)
+      },
+      leaveOut: function (a) {
+        this.out(a), this.propagate(a, this.leave, !1)
+      },
+      enterOver: function (a) {
+        this.over(a), this.propagate(a, this.enter, !0)
+      },
+      eventHandler: function (a) {
+        if (!a._handledByPE) {
+          var b = a.type,
+            c = this.eventMap && this.eventMap[b];
+          c && c(a), a._handledByPE = !0
+        }
+      },
+      listen: function (a, b) {
+        b.forEach(function (b) {
+          this.addEvent(a, b)
+        }, this)
+      },
+      unlisten: function (a, b) {
+        b.forEach(function (b) {
+          this.removeEvent(a, b)
+        }, this)
+      },
+      addEvent: function (a, b) {
+        a.addEventListener(b, this.boundHandler)
+      },
+      removeEvent: function (a, b) {
+        a.removeEventListener(b, this.boundHandler)
+      },
+      makeEvent: function (b, c) {
+        this.captureInfo[c.pointerId] && (c.relatedTarget = null);
+        var d = new a(b, c);
+        return c.preventDefault && (d.preventDefault = c.preventDefault), d._target = d._target || c.target, d
+      },
+      fireEvent: function (a, b) {
+        var c = this.makeEvent(a, b);
+        return this.dispatchEvent(c)
+      },
+      cloneEvent: function (a) {
+        for (var b, c = Object.create(null), d = 0; d < q.length; d++) b = q[d], c[b] = a[b] || r[d], !t || "target" !== b && "relatedTarget" !== b || c[b] instanceof SVGElementInstance && (c[b] = c[b].correspondingUseElement);
+        return a.preventDefault && (c.preventDefault = function () {
+          a.preventDefault()
+        }), c
+      },
+      getTarget: function (a) {
+        var b = this.captureInfo[a.pointerId];
+        return b ? a._target !== b && a.type in s ? void 0 : b : a._target
+      },
+      propagate: function (a, b, c) {
+        for (var d = a.target, e = []; d !== document && !d.contains(a.relatedTarget);)
+          if (e.push(d), d = d.parentNode, !d) return;
+        c && e.reverse(), e.forEach(function (c) {
+          a.target = c, b.call(this, a)
+        }, this)
+      },
+      setCapture: function (b, c, d) {
+        this.captureInfo[b] && this.releaseCapture(b, d), this.captureInfo[b] = c, this.implicitRelease = this.releaseCapture.bind(this, b, d), document.addEventListener("pointerup", this.implicitRelease), document.addEventListener("pointercancel", this.implicitRelease);
+        var e = new a("gotpointercapture");
+        e.pointerId = b, e._target = c, d || this.asyncDispatchEvent(e)
+      },
+      releaseCapture: function (b, c) {
+        var d = this.captureInfo[b];
+        if (d) {
+          this.captureInfo[b] = void 0, document.removeEventListener("pointerup", this.implicitRelease), document.removeEventListener("pointercancel", this.implicitRelease);
+          var e = new a("lostpointercapture");
+          e.pointerId = b, e._target = d, c || this.asyncDispatchEvent(e)
+        }
+      },
+      dispatchEvent: /*scope.external.dispatchEvent || */ function (a) {
+        var b = this.getTarget(a);
+        if (b) return b.dispatchEvent(a)
+      },
+      asyncDispatchEvent: function (a) {
+        requestAnimationFrame(this.dispatchEvent.bind(this, a))
+      }
+    };
+  u.boundHandler = u.eventHandler.bind(u);
+  var v = {
+      shadow: function (a) {
+        if (a) return a.shadowRoot || a.webkitShadowRoot
+      },
+      canTarget: function (a) {
+        return a && Boolean(a.elementFromPoint)
+      },
+      targetingShadow: function (a) {
+        var b = this.shadow(a);
+        if (this.canTarget(b)) return b
+      },
+      olderShadow: function (a) {
+        var b = a.olderShadowRoot;
+        if (!b) {
+          var c = a.querySelector("shadow");
+          c && (b = c.olderShadowRoot)
+        }
+        return b
+      },
+      allShadows: function (a) {
+        for (var b = [], c = this.shadow(a); c;) b.push(c), c = this.olderShadow(c);
+        return b
+      },
+      searchRoot: function (a, b, c) {
+        if (a) {
+          var d, e, f = a.elementFromPoint(b, c);
+          for (e = this.targetingShadow(f); e;) {
+            if (d = e.elementFromPoint(b, c)) {
+              var g = this.targetingShadow(d);
+              return this.searchRoot(g, b, c) || d
+            }
+            e = this.olderShadow(e)
+          }
+          return f
+        }
+      },
+      owner: function (a) {
+        for (var b = a; b.parentNode;) b = b.parentNode;
+        return b.nodeType !== Node.DOCUMENT_NODE && b.nodeType !== Node.DOCUMENT_FRAGMENT_NODE && (b = document), b
+      },
+      findTarget: function (a) {
+        var b = a.clientX,
+          c = a.clientY,
+          d = this.owner(a.target);
+        return d.elementFromPoint(b, c) || (d = document), this.searchRoot(d, b, c)
+      }
+    },
+    w = Array.prototype.forEach.call.bind(Array.prototype.forEach),
+    x = Array.prototype.map.call.bind(Array.prototype.map),
+    y = Array.prototype.slice.call.bind(Array.prototype.slice),
+    z = Array.prototype.filter.call.bind(Array.prototype.filter),
+    A = window.MutationObserver || window.WebKitMutationObserver,
+    B = "[touch-action]",
+    C = {
+      subtree: !0,
+      childList: !0,
+      attributes: !0,
+      attributeOldValue: !0,
+      attributeFilter: ["touch-action"]
+    };
+  c.prototype = {
+    watchSubtree: function (a) {
+      //
+      this.observer && v.canTarget(a) && this.observer.observe(a, C)
+    },
+    enableOnSubtree: function (a) {
+      this.watchSubtree(a), a === document && "complete" !== document.readyState ? this.installOnLoad() : this.installNewSubtree(a)
+    },
+    installNewSubtree: function (a) {
+      w(this.findElements(a), this.addElement, this)
+    },
+    findElements: function (a) {
+      return a.querySelectorAll ? a.querySelectorAll(B) : []
+    },
+    removeElement: function (a) {
+      this.removeCallback(a)
+    },
+    addElement: function (a) {
+      this.addCallback(a)
+    },
+    elementChanged: function (a, b) {
+      this.changedCallback(a, b)
+    },
+    concatLists: function (a, b) {
+      return a.concat(y(b))
+    },
+    installOnLoad: function () {
+      document.addEventListener("readystatechange", function () {
+        "complete" === document.readyState && this.installNewSubtree(document)
+      }.bind(this))
+    },
+    isElement: function (a) {
+      return a.nodeType === Node.ELEMENT_NODE
+    },
+    flattenMutationTree: function (a) {
+      var b = x(a, this.findElements, this);
+      return b.push(z(a, this.isElement)), b.reduce(this.concatLists, [])
+    },
+    mutationWatcher: function (a) {
+      a.forEach(this.mutationHandler, this)
+    },
+    mutationHandler: function (a) {
+      if ("childList" === a.type) {
+        var b = this.flattenMutationTree(a.addedNodes);
+        b.forEach(this.addElement, this);
+        var c = this.flattenMutationTree(a.removedNodes);
+        c.forEach(this.removeElement, this)
+      } else "attributes" === a.type && this.elementChanged(a.target, a.oldValue)
+    }
+  };
+  var D = ["none", "auto", "pan-x", "pan-y", {
+      rule: "pan-x pan-y",
+      selectors: ["pan-x pan-y", "pan-y pan-x"]
+    }],
+    E = "",
+    F = window.PointerEvent || window.MSPointerEvent,
+    G = !window.ShadowDOMPolyfill && document.head.createShadowRoot,
+    H = u.pointermap,
+    I = 25,
+    J = [1, 4, 2, 8, 16],
+    K = !1;
+  try {
+    K = 1 === new MouseEvent("test", {
+      buttons: 1
+    }).buttons
+  } catch (L) {}
+  var M, N = {
+      POINTER_ID: 1,
+      POINTER_TYPE: "mouse",
+      events: ["mousedown", "mousemove", "mouseup", "mouseover", "mouseout"],
+      register: function (a) {
+        u.listen(a, this.events)
+      },
+      unregister: function (a) {
+        u.unlisten(a, this.events)
+      },
+      lastTouches: [],
+      isEventSimulatedFromTouch: function (a) {
+        for (var b, c = this.lastTouches, d = a.clientX, e = a.clientY, f = 0, g = c.length; f < g && (b = c[f]); f++) {
+          var h = Math.abs(d - b.x),
+            i = Math.abs(e - b.y);
+          if (h <= I && i <= I) return !0
+        }
+      },
+      prepareEvent: function (a) {
+        var b = u.cloneEvent(a),
+          c = b.preventDefault;
+        return b.preventDefault = function () {
+          a.preventDefault(), c()
+        }, b.pointerId = this.POINTER_ID, b.isPrimary = !0, b.pointerType = this.POINTER_TYPE, b
+      },
+      prepareButtonsForMove: function (a, b) {
+        var c = H.get(this.POINTER_ID);
+        0 !== b.which && c ? a.buttons = c.buttons : a.buttons = 0, b.buttons = a.buttons
+      },
+      mousedown: function (a) {
+        if (!this.isEventSimulatedFromTouch(a)) {
+          var b = H.get(this.POINTER_ID),
+            c = this.prepareEvent(a);
+          K || (c.buttons = J[c.button], b && (c.buttons |= b.buttons), a.buttons = c.buttons), H.set(this.POINTER_ID, a), b && 0 !== b.buttons ? u.move(c) : u.down(c)
+        }
+      },
+      mousemove: function (a) {
+        if (!this.isEventSimulatedFromTouch(a)) {
+          var b = this.prepareEvent(a);
+          K || this.prepareButtonsForMove(b, a), b.button = -1, H.set(this.POINTER_ID, a), u.move(b)
+        }
+      },
+      mouseup: function (a) {
+        if (!this.isEventSimulatedFromTouch(a)) {
+          var b = H.get(this.POINTER_ID),
+            c = this.prepareEvent(a);
+          if (!K) {
+            var d = J[c.button];
+            c.buttons = b ? b.buttons & ~d : 0, a.buttons = c.buttons
+          }
+          H.set(this.POINTER_ID, a),
+            c.buttons &= ~J[c.button], 0 === c.buttons ? u.up(c) : u.move(c)
+        }
+      },
+      mouseover: function (a) {
+        if (!this.isEventSimulatedFromTouch(a)) {
+          var b = this.prepareEvent(a);
+          K || this.prepareButtonsForMove(b, a), b.button = -1, H.set(this.POINTER_ID, a), u.enterOver(b)
+        }
+      },
+      mouseout: function (a) {
+        if (!this.isEventSimulatedFromTouch(a)) {
+          var b = this.prepareEvent(a);
+          K || this.prepareButtonsForMove(b, a), b.button = -1, u.leaveOut(b)
+        }
+      },
+      cancel: function (a) {
+        var b = this.prepareEvent(a);
+        u.cancel(b), this.deactivateMouse()
+      },
+      deactivateMouse: function () {
+        H["delete"](this.POINTER_ID)
+      }
+    },
+    O = u.captureInfo,
+    P = v.findTarget.bind(v),
+    Q = v.allShadows.bind(v),
+    R = u.pointermap,
+    S = 2500,
+    T = 200,
+    U = "touch-action",
+    V = {
+      events: ["touchstart", "touchmove", "touchend", "touchcancel"],
+      register: function (a) {
+        M.enableOnSubtree(a)
+      },
+      unregister: function () {},
+      elementAdded: function (a) {
+        var b = a.getAttribute(U),
+          c = this.touchActionToScrollType(b);
+        c && (a._scrollType = c, u.listen(a, this.events),
+          Q(a).forEach(function (a) {
+            a._scrollType = c, u.listen(a, this.events)
+          }, this))
+      },
+      elementRemoved: function (a) {
+        a._scrollType = void 0, u.unlisten(a, this.events),
+          Q(a).forEach(function (a) {
+            a._scrollType = void 0, u.unlisten(a, this.events)
+          }, this)
+      },
+      elementChanged: function (a, b) {
+        var c = a.getAttribute(U),
+          d = this.touchActionToScrollType(c),
+          e = this.touchActionToScrollType(b);
+        d && e ? (a._scrollType = d, Q(a).forEach(function (a) {
+          a._scrollType = d
+        }, this)) : e ? this.elementRemoved(a) : d && this.elementAdded(a)
+      },
+      scrollTypes: {
+        EMITTER: "none",
+        XSCROLLER: "pan-x",
+        YSCROLLER: "pan-y",
+        SCROLLER: /^(?:pan-x pan-y)|(?:pan-y pan-x)|auto$/
+      },
+      touchActionToScrollType: function (a) {
+        var b = a,
+          c = this.scrollTypes;
+        return "none" === b ? "none" : b === c.XSCROLLER ? "X" : b === c.YSCROLLER ? "Y" : c.SCROLLER.exec(b) ? "XY" : void 0
+      },
+      POINTER_TYPE: "touch",
+      firstTouch: null,
+      isPrimaryTouch: function (a) {
+        return this.firstTouch === a.identifier
+      },
+      setPrimaryTouch: function (a) {
+        (0 === R.size || 1 === R.size && R.has(1)) && (this.firstTouch = a.identifier, this.firstXY = {
+          X: a.clientX,
+          Y: a.clientY
+        }, this.scrolling = !1, this.cancelResetClickCount())
+      },
+      removePrimaryPointer: function (a) {
+        a.isPrimary && (this.firstTouch = null, this.firstXY = null, this.resetClickCount())
+      },
+      clickCount: 0,
+      resetId: null,
+      resetClickCount: function () {
+        var a = function () {
+          this.clickCount = 0, this.resetId = null
+        }.bind(this);
+        this.resetId = setTimeout(a, T)
+      },
+      cancelResetClickCount: function () {
+        this.resetId && clearTimeout(this.resetId)
+      },
+      typeToButtons: function (a) {
+        var b = 0;
+        return "touchstart" !== a && "touchmove" !== a || (b = 1), b
+      },
+      touchToPointer: function (a) {
+        var b = this.currentTouchEvent,
+          c = u.cloneEvent(a),
+          d = c.pointerId = a.identifier + 2;
+        c.target = O[d] || P(c), c.bubbles = !0, c.cancelable = !0, c.detail = this.clickCount, c.button = 0, c.buttons = this.typeToButtons(b.type), c.width = 2 * (a.radiusX || a.webkitRadiusX || 0), c.height = 2 * (a.radiusY || a.webkitRadiusY || 0), c.pressure = a.force || a.webkitForce || .5, c.isPrimary = this.isPrimaryTouch(a), c.pointerType = this.POINTER_TYPE,
+          c.altKey = b.altKey, c.ctrlKey = b.ctrlKey, c.metaKey = b.metaKey, c.shiftKey = b.shiftKey;
+        var e = this;
+        return c.preventDefault = function () {
+          e.scrolling = !1, e.firstXY = null, b.preventDefault()
+        }, c
+      },
+      processTouches: function (a, b) {
+        var c = a.changedTouches;
+        this.currentTouchEvent = a;
+        for (var d, e = 0; e < c.length; e++) d = c[e], b.call(this, this.touchToPointer(d))
+      },
+      shouldScroll: function (a) {
+        if (this.firstXY) {
+          var b, c = a.currentTarget._scrollType;
+          if ("none" === c)
+            b = !1;
+          else if ("XY" === c)
+            b = !0;
+          else {
+            var d = a.changedTouches[0],
+              e = c,
+              f = "Y" === c ? "X" : "Y",
+              g = Math.abs(d["client" + e] - this.firstXY[e]),
+              h = Math.abs(d["client" + f] - this.firstXY[f]);
+            b = g >= h
+          }
+          return this.firstXY = null, b
+        }
+      },
+      findTouch: function (a, b) {
+        for (var c, d = 0, e = a.length; d < e && (c = a[d]); d++)
+          if (c.identifier === b) return !0
+      },
+      vacuumTouches: function (a) {
+        var b = a.touches;
+        if (R.size >= b.length) {
+          var c = [];
+          R.forEach(function (a, d) {
+            if (1 !== d && !this.findTouch(b, d - 2)) {
+              var e = a.out;
+              c.push(e)
+            }
+          }, this), c.forEach(this.cancelOut, this)
+        }
+      },
+      touchstart: function (a) {
+        this.vacuumTouches(a), this.setPrimaryTouch(a.changedTouches[0]), this.dedupSynthMouse(a), this.scrolling || (this.clickCount++, this.processTouches(a, this.overDown))
+      },
+      overDown: function (a) {
+        R.set(a.pointerId, {
+          target: a.target,
+          out: a,
+          outTarget: a.target
+        }), u.enterOver(a), u.down(a)
+      },
+      touchmove: function (a) {
+        this.scrolling || (this.shouldScroll(a) ? (this.scrolling = !0, this.touchcancel(a)) : (a.preventDefault(), this.processTouches(a, this.moveOverOut)))
+      },
+      moveOverOut: function (a) {
+        var b = a,
+          c = R.get(b.pointerId);
+        if (c) {
+          var d = c.out,
+            e = c.outTarget;
+          u.move(b), d && e !== b.target && (d.relatedTarget = b.target, b.relatedTarget = e,
+            d.target = e, b.target ? (u.leaveOut(d), u.enterOver(b)) : (
+              b.target = e, b.relatedTarget = null, this.cancelOut(b))), c.out = b, c.outTarget = b.target
+        }
+      },
+      touchend: function (a) {
+        this.dedupSynthMouse(a), this.processTouches(a, this.upOut)
+      },
+      upOut: function (a) {
+        this.scrolling || (u.up(a), u.leaveOut(a)), this.cleanUpPointer(a)
+      },
+      touchcancel: function (a) {
+        this.processTouches(a, this.cancelOut)
+      },
+      cancelOut: function (a) {
+        u.cancel(a), u.leaveOut(a), this.cleanUpPointer(a)
+      },
+      cleanUpPointer: function (a) {
+        R["delete"](a.pointerId), this.removePrimaryPointer(a)
+      },
+      dedupSynthMouse: function (a) {
+        var b = N.lastTouches,
+          c = a.changedTouches[0];
+        if (this.isPrimaryTouch(c)) {
+          var d = {
+            x: c.clientX,
+            y: c.clientY
+          };
+          b.push(d);
+          var e = function (a, b) {
+            var c = a.indexOf(b);
+            c > -1 && a.splice(c, 1)
+          }.bind(null, b, d);
+          setTimeout(e, S)
+        }
+      }
+    };
+  M = new c(V.elementAdded, V.elementRemoved, V.elementChanged, V);
+  var W, X, Y, Z = u.pointermap,
+    $ = window.MSPointerEvent && "number" == typeof window.MSPointerEvent.MSPOINTER_TYPE_MOUSE,
+    _ = {
+      events: ["MSPointerDown", "MSPointerMove", "MSPointerUp", "MSPointerOut", "MSPointerOver", "MSPointerCancel", "MSGotPointerCapture", "MSLostPointerCapture"],
+      register: function (a) {
+        u.listen(a, this.events)
+      },
+      unregister: function (a) {
+        u.unlisten(a, this.events)
+      },
+      POINTER_TYPES: ["", "unavailable", "touch", "pen", "mouse"],
+      prepareEvent: function (a) {
+        var b = a;
+        return $ && (b = u.cloneEvent(a), b.pointerType = this.POINTER_TYPES[a.pointerType]), b
+      },
+      cleanup: function (a) {
+        Z["delete"](a)
+      },
+      MSPointerDown: function (a) {
+        Z.set(a.pointerId, a);
+        var b = this.prepareEvent(a);
+        u.down(b)
+      },
+      MSPointerMove: function (a) {
+        var b = this.prepareEvent(a);
+        u.move(b)
+      },
+      MSPointerUp: function (a) {
+        var b = this.prepareEvent(a);
+        u.up(b), this.cleanup(a.pointerId)
+      },
+      MSPointerOut: function (a) {
+        var b = this.prepareEvent(a);
+        u.leaveOut(b)
+      },
+      MSPointerOver: function (a) {
+        var b = this.prepareEvent(a);
+        u.enterOver(b)
+      },
+      MSPointerCancel: function (a) {
+        var b = this.prepareEvent(a);
+        u.cancel(b), this.cleanup(a.pointerId)
+      },
+      MSLostPointerCapture: function (a) {
+        var b = u.makeEvent("lostpointercapture", a);
+        u.dispatchEvent(b)
+      },
+      MSGotPointerCapture: function (a) {
+        var b = u.makeEvent("gotpointercapture", a);
+        u.dispatchEvent(b)
+      }
+    },
+    aa = window.navigator;
+  aa.msPointerEnabled ? (W = function (a) {
+    i(a), j(this), k(a) && (u.setCapture(a, this, !0), this.msSetPointerCapture(a))
+  }, X = function (a) {
+    i(a), u.releaseCapture(a, !0), this.msReleasePointerCapture(a)
+  }) : (W = function (a) {
+    i(a), j(this), k(a) && u.setCapture(a, this)
+  }, X = function (a) {
+    i(a), u.releaseCapture(a)
+  }), Y = function (a) {
+    return !!u.captureInfo[a]
+  }, g(), h(), l();
+  var ba = {
+    dispatcher: u,
+    Installer: c,
+    PointerEvent: a,
+    PointerMap: p,
+    targetFinding: v
+  };
+  return ba
+});
+///////////////////////////////////////////////
+
+///////////////////////////////////////////////
+var config = {"show_fabrication":false,"redraw_on_drag":true,"highlight_pin1":false,"extra_fields":[],"dark_mode":false,"bom_view":"left-right","board_rotation":0,"checkboxes":"Sourced,Placed","show_silkscreen":true,"show_pads":true,"layer_view":"FB"};
+///////////////////////////////////////////////
+
+///////////////////////////////////////////////
+var pcbdata = {"ibom_version":"v2.3-50-g53ae\n","edges_bbox":{"minx":4025.5,"miny":3043.8,"maxx":4120,"maxy":3092.5},"edges":[{"type":"polyline","net":"","start":[0,0],"end":[0,0],"width":1,"svgpath":"M4047.56,3048.85 4115,3048.85 4115,3087 4047.56,3087 4047.56,3048.85"}],"drawings":{"silkscreen":{"F":[{"type":"polyline","net":"","start":[0,0],"end":[0,0],"width":1,"svgpath":"M4079.1426,3061.9838 4081.5046,3061.9838"},{"type":"polyline","net":"","start":[0,0],"end":[0,0],"width":1,"svgpath":"M4079.1426,3074.5818 4081.5046,3074.5818"},{"type":"polyline","net":"","start":[0,0],"end":[0,0],"width":1,"svgpath":"M4088.985,3061.9836 4090.1661,3061.9836 4090.1661,3074.582 4088.985,3074.582"},{"type":"polyline","net":"","start":[0,0],"end":[0,0],"width":1,"svgpath":"M4071.4648,3074.5817 4070.2837,3074.5817 4070.2837,3061.9833 4071.4648,3061.9833"},{"type":"circle","_svgpath":"M 4070.8745, 3076.1568 m -0.394, 0 a 0.394,0.394 0 1,0 0.788,0 a 0.394,0.394 0 1,0 -0.788,0","start":[4070.8745,3076.1568],"radius":0.394,"width":0.7874,"net":""},{"type":"text","svgpath":"M 4081.2936 3047.8678 L 4079.2436 3050.7278 L 4082.3136 3050.7278 M 4081.2936 3047.8678 L 4081.2936 3052.1578 M 4083.8636 3051.1378 L 4083.6636 3051.3478 L 4083.8636 3051.5478 L 4084.0736 3051.3478 L 4083.8636 3051.1378 M 4088.0836 3049.2978 L 4087.8736 3049.9078 L 4087.4636 3050.3178 L 4086.8536 3050.5278 L 4086.6436 3050.5278 L 4086.0336 3050.3178 L 4085.6236 3049.9078 L 4085.4236 3049.2978 L 4085.4236 3049.0978 L 4085.6236 3048.4778 L 4086.0336 3048.0678 L 4086.6436 3047.8678 L 4086.8536 3047.8678 L 4087.4636 3048.0678 L 4087.8736 3048.4778 L 4088.0836 3049.2978 L 4088.0836 3050.3178 L 4087.8736 3051.3478 L 4087.4636 3051.9578 L 4086.8536 3052.1578 L 4086.4436 3052.1578 L 4085.8336 3051.9578 L 4085.6236 3051.5478 M 4089.4336 3048.6878 L 4089.8436 3048.4778 L 4090.4536 3047.8678 L 4090.4536 3052.1578 M 4094.2536 3047.8678 L 4092.2136 3047.8678 L 4092.0036 3049.7078 L 4092.2136 3049.5078 L 4092.8236 3049.2978 L 4093.4436 3049.2978 L 4094.0536 3049.5078 L 4094.4636 3049.9078 L 4094.6636 3050.5278 L 4094.6636 3050.9378 L 4094.4636 3051.5478 L 4094.0536 3051.9578 L 4093.4436 3052.1578 L 4092.8236 3052.1578 L 4092.2136 3051.9578 L 4092.0036 3051.7578 L 4091.8036 3051.3478 M 4096.2236 3048.8878 L 4096.2236 3048.6878 L 4096.4236 3048.2778 L 4096.6336 3048.0678 L 4097.0436 3047.8678 L 4097.8536 3047.8678 L 4098.2636 3048.0678 L 4098.4736 3048.2778 L 4098.6736 3048.6878 L 4098.6736 3049.0978 L 4098.4736 3049.5078 L 4098.0636 3050.1178 L 4096.0136 3052.1578 L 4098.8836 3052.1578 M 4100.2336 3047.8678 L 4100.2336 3052.1578 M 4100.2336 3047.8678 L 4101.8636 3052.1578 M 4103.5036 3047.8678 L 4101.8636 3052.1578 M 4103.5036 3047.8678 L 4103.5036 3052.1578 M 4104.8536 3047.8678 L 4104.8536 3052.1578 M 4107.7136 3047.8678 L 4107.7136 3052.1578 M 4104.8536 3049.9078 L 4107.7136 3049.9078 M 4111.3136 3049.2978 L 4109.0636 3052.1578 M 4109.0636 3049.2978 L 4111.3136 3049.2978 M 4109.0636 3052.1578 L 4111.3136 3052.1578","useTrueTypeFontRendering":false,"thickness":0.6,"width":0.6,"val":1},{"type":"text","svgpath":"M 4030.5 3064.2378 L 4033.36 3068.5278 M 4033.36 3064.2378 L 4030.5 3068.5278 M 4034.71 3065.0578 L 4035.12 3064.8478 L 4035.74 3064.2378 L 4035.74 3068.5278","useTrueTypeFontRendering":false,"thickness":0.6,"width":0.6,"ref":1},{"type":"polyline","net":"","start":[0,0],"end":[0,0],"width":0.6,"svgpath":"M4065.838,3079.8549 4065.838,3056.7951 4095.512,3056.7951 4095.512,3079.8549 4065.838,3079.8549"},{"type":"polyline","net":"","start":[0,0],"end":[0,0],"width":0.6,"svgpath":"M4064.938,3073.0494 4064.938,3080.7549 4073.8246,3080.7549"},{"type":"text","svgpath":"M 4082.125 3044.395 L 4081.925 3043.985 L 4081.315 3043.785 L 4080.905 3043.785 L 4080.285 3043.985 L 4079.875 3044.605 L 4079.675 3045.625 L 4079.675 3046.645 L 4079.875 3047.465 L 4080.285 3047.875 L 4080.905 3048.075 L 4081.105 3048.075 L 4081.725 3047.875 L 4082.125 3047.465 L 4082.335 3046.855 L 4082.335 3046.645 L 4082.125 3046.035 L 4081.725 3045.625 L 4081.105 3045.425 L 4080.905 3045.425 L 4080.285 3045.625 L 4079.875 3046.035 L 4079.675 3046.645 M 4084.915 3043.785 L 4084.295 3043.985 L 4083.885 3044.605 L 4083.685 3045.625 L 4083.685 3046.235 L 4083.885 3047.265 L 4084.295 3047.875 L 4084.915 3048.075 L 4085.325 3048.075 L 4085.935 3047.875 L 4086.345 3047.265 L 4086.545 3046.235 L 4086.545 3045.625 L 4086.345 3044.605 L 4085.935 3043.985 L 4085.325 3043.785 L 4084.915 3043.785 M 4087.895 3043.785 L 4087.895 3048.075 M 4087.895 3043.785 L 4089.535 3048.075 M 4091.175 3043.785 L 4089.535 3048.075 M 4091.175 3043.785 L 4091.175 3048.075 M 4092.525 3043.785 L 4092.525 3048.075 M 4095.385 3043.785 L 4095.385 3048.075 M 4092.525 3045.825 L 4095.385 3045.825 M 4098.985 3045.215 L 4096.735 3048.075 M 4096.735 3045.215 L 4098.985 3045.215 M 4096.735 3048.075 L 4098.985 3048.075","useTrueTypeFontRendering":false,"thickness":0.6,"width":0.6,"val":1},{"type":"text","svgpath":"M 4031 3075.785 L 4033.86 3080.075 M 4033.86 3075.785 L 4031 3080.075 M 4035.42 3076.805 L 4035.42 3076.605 L 4035.62 3076.195 L 4035.83 3075.985 L 4036.24 3075.785 L 4037.05 3075.785 L 4037.46 3075.985 L 4037.67 3076.195 L 4037.87 3076.605 L 4037.87 3077.015 L 4037.67 3077.425 L 4037.26 3078.035 L 4035.21 3080.075 L 4038.08 3080.075","useTrueTypeFontRendering":false,"thickness":0.6,"width":0.6,"ref":1},{"type":"circle","_svgpath":"M 4047, 3086.5 m -1, 0 a 1,1 0 1,0 2,0 a 1,1 0 1,0 -2,0","start":[4047,3086.5],"radius":1,"width":1,"net":""},{"type":"text","svgpath":"M4082.71 3033.40C4082.76 3033.40 4082.80 3033.38 4082.82 3033.33C4082.66 3033.19 4082.42 3033 4082.42 3033L4082.20 3033.28L4080.30 3033.28L4080.30 3033.07C4081.01 3032.81 4081.73 3032.42 4082.15 3032.10C4082.23 3032.13 4082.27 3032.12 4082.30 3032.08L4081.92 3031.79C4081.58 3032.16 4080.92 3032.64 4080.30 3032.97L4080.30 3031.81C4080.42 3031.80 4080.45 3031.76 4080.46 3031.72L4079.97 3031.66L4079.97 3033.28L4079.20 3033.28L4079.24 3033.40L4079.97 3033.40L4079.97 3034.72C4079.97 3034.81 4079.95 3034.84 4079.80 3034.93L4080.06 3035.34C4080.09 3035.32 4080.12 3035.29 4080.14 3035.25C4080.64 3034.99 4081.06 3034.74 4081.30 3034.60L4081.29 3034.54C4080.93 3034.66 4080.58 3034.76 4080.30 3034.84L4080.30 3033.40L4080.90 3033.40C4081.17 3034.31 4081.75 3034.88 4082.54 3035.22C4082.60 3035.07 4082.70 3034.97 4082.85 3034.95L4082.86 3034.90C4082.03 3034.67 4081.30 3034.18 4080.98 3033.40ZM4084.58 3031.64C4084.77 3031.81 4084.98 3032.10 4085.03 3032.33C4085.37 3032.57 4085.63 3031.86 4084.62 3031.61ZM4086.21 3032.45L4083.17 3032.45L4083.20 3032.56L4084.38 3032.56C4084.35 3033.70 4084.14 3034.61 4083.23 3035.29L4083.27 3035.34C4084.17 3034.88 4084.52 3034.22 4084.68 3033.36L4085.86 3033.36C4085.82 3034.18 4085.73 3034.77 4085.60 3034.89C4085.56 3034.93 4085.52 3034.94 4085.44 3034.94C4085.35 3034.94 4085.02 3034.91 4084.84 3034.89L4084.83 3034.96C4085.01 3034.98 4085.19 3035.04 4085.26 3035.09C4085.32 3035.14 4085.34 3035.22 4085.34 3035.32C4085.55 3035.32 4085.70 3035.26 4085.82 3035.16C4086.02 3034.98 4086.13 3034.34 4086.18 3033.40C4086.27 3033.39 4086.32 3033.37 4086.35 3033.34L4086.01 3033.05L4085.82 3033.24L4084.69 3033.24C4084.73 3033.03 4084.75 3032.80 4084.76 3032.56L4086.74 3032.56C4086.79 3032.56 4086.83 3032.54 4086.84 3032.50C4086.69 3032.36 4086.43 3032.17 4086.43 3032.17ZM4089.34 3032.93C4089.84 3032.70 4090.30 3032.37 4090.66 3031.98C4090.74 3032 4090.78 3031.99 4090.80 3031.95L4090.39 3031.70C4090.10 3032.16 4089.72 3032.57 4089.29 3032.86ZM4089.17 3034.02C4089.76 3033.80 4090.28 3033.46 4090.67 3033.00C4090.76 3033.02 4090.80 3033.01 4090.82 3032.97L4090.40 3032.73C4090.07 3033.26 4089.64 3033.67 4089.14 3033.97ZM4087.98 3033.18L4087.98 3032.09L4088.55 3032.09L4088.55 3033.18ZM4089.43 3033.29C4089.48 3033.29 4089.52 3033.27 4089.54 3033.23C4089.40 3033.10 4089.18 3032.91 4089.18 3032.91L4088.98 3033.18L4088.87 3033.18L4088.87 3032.09L4089.34 3032.09C4089.39 3032.09 4089.43 3032.07 4089.44 3032.03C4089.30 3031.90 4089.07 3031.72 4089.07 3031.72L4088.87 3031.98L4087.23 3031.98L4087.26 3032.09L4087.67 3032.09L4087.67 3033.18L4087.15 3033.18L4087.18 3033.29L4087.67 3033.29C4087.66 3033.99 4087.60 3034.71 4087.14 3035.29L4087.19 3035.34C4087.89 3034.79 4087.98 3034.00 4087.98 3033.29L4088.55 3033.29L4088.55 3035.29L4088.61 3035.29C4088.77 3035.29 4088.86 3035.22 4088.87 3035.19L4088.87 3033.29ZM4090.46 3033.74C4090.09 3034.46 4089.58 3034.92 4088.94 3035.25L4088.97 3035.31C4089.71 3035.06 4090.30 3034.66 4090.76 3034.01C4090.84 3034.02 4090.88 3034.01 4090.91 3033.97ZM4093.72 3031.97L4093.72 3032.44L4092.30 3032.44L4092.30 3031.97ZM4092.30 3033.04L4092.30 3032.55L4093.72 3032.55L4093.72 3033.04ZM4092.30 3033.16L4093.72 3033.16L4093.72 3033.37L4093.76 3033.37C4093.87 3033.37 4094.02 3033.30 4094.03 3033.27L4094.03 3032.02C4094.11 3032.01 4094.17 3031.98 4094.20 3031.94L4093.84 3031.67L4093.68 3031.85L4092.32 3031.85L4091.99 3031.70L4091.99 3033.40L4092.04 3033.40C4092.17 3033.40 4092.30 3033.32 4092.30 3033.29ZM4091.65 3034.88L4091.65 3034.36L4092.46 3034.36L4092.46 3034.88ZM4092.46 3033.73L4092.46 3034.24L4091.65 3034.24L4091.65 3033.73ZM4092.42 3033.61L4091.67 3033.61L4091.35 3033.47L4091.35 3035.32L4091.40 3035.32C4091.53 3035.32 4091.65 3035.24 4091.65 3035.21L4091.65 3035.00L4092.46 3035.00L4092.46 3035.29L4092.51 3035.29C4092.62 3035.29 4092.77 3035.22 4092.77 3035.19L4092.77 3033.78C4092.85 3033.77 4092.91 3033.74 4092.94 3033.70L4092.59 3033.43ZM4093.50 3034.88L4093.50 3034.36L4094.34 3034.36L4094.34 3034.88ZM4094.34 3033.73L4094.34 3034.24L4093.50 3034.24L4093.50 3033.73ZM4094.46 3033.43L4094.30 3033.61L4093.52 3033.61L4093.19 3033.47L4093.19 3035.32L4093.24 3035.32C4093.37 3035.32 4093.50 3035.24 4093.50 3035.21L4093.50 3035.00L4094.34 3035.00L4094.34 3035.29L4094.39 3035.29C4094.49 3035.29 4094.65 3035.22 4094.65 3035.20L4094.65 3033.78C4094.73 3033.77 4094.79 3033.74 4094.82 3033.70ZM4096.45 3033.20C4096.29 3033.26 4096.14 3033.32 4095.98 3033.38L4095.98 3032.66L4096.43 3032.66C4096.48 3032.66 4096.52 3032.64 4096.53 3032.60C4096.42 3032.47 4096.23 3032.30 4096.23 3032.30L4096.05 3032.54L4095.98 3032.54L4095.98 3031.79C4096.08 3031.78 4096.12 3031.74 4096.13 3031.68L4095.68 3031.63L4095.68 3032.54L4095.15 3032.54L4095.18 3032.66L4095.68 3032.66L4095.68 3033.49C4095.43 3033.58 4095.21 3033.66 4095.10 3033.69L4095.26 3034.07C4095.30 3034.05 4095.33 3034.01 4095.34 3033.96C4095.46 3033.89 4095.58 3033.82 4095.68 3033.75L4095.68 3034.85C4095.68 3034.91 4095.66 3034.93 4095.60 3034.93C4095.52 3034.93 4095.16 3034.90 4095.16 3034.90L4095.16 3034.96C4095.33 3034.99 4095.42 3035.02 4095.47 3035.08C4095.52 3035.13 4095.54 3035.22 4095.55 3035.32C4095.94 3035.28 4095.98 3035.12 4095.98 3034.88L4095.98 3033.56C4096.18 3033.44 4096.34 3033.34 4096.47 3033.25ZM4098.47 3033.50C4098.39 3033.65 4098.20 3033.94 4098.04 3034.14C4097.93 3033.92 4097.84 3033.66 4097.79 3033.37L4098.75 3033.37C4098.80 3033.37 4098.84 3033.35 4098.85 3033.30C4098.72 3033.17 4098.48 3033.00 4098.48 3033.00L4098.29 3033.25L4096.84 3033.25C4096.84 3033.09 4096.84 3032.94 4096.84 3032.80L4096.84 3032.08L4098.73 3032.08C4098.78 3032.08 4098.82 3032.06 4098.83 3032.01C4098.69 3031.88 4098.46 3031.70 4098.46 3031.70L4098.26 3031.96L4096.90 3031.96L4096.54 3031.81L4096.54 3032.80C4096.54 3033.60 4096.50 3034.52 4096.08 3035.28L4096.14 3035.32C4096.64 3034.76 4096.79 3034.01 4096.83 3033.37L4097.11 3033.37L4097.11 3034.76C4097.11 3034.84 4097.08 3034.87 4096.92 3034.94L4097.11 3035.33C4097.14 3035.32 4097.18 3035.28 4097.21 3035.23C4097.52 3035.06 4097.81 3034.87 4097.96 3034.78L4097.95 3034.73C4097.76 3034.78 4097.57 3034.82 4097.40 3034.86L4097.40 3033.37L4097.70 3033.37C4097.82 3034.29 4098.08 3034.90 4098.62 3035.31C4098.68 3035.17 4098.78 3035.09 4098.90 3035.08L4098.91 3035.04C4098.56 3034.85 4098.29 3034.58 4098.08 3034.22C4098.31 3034.07 4098.54 3033.88 4098.67 3033.76C4098.75 3033.78 4098.81 3033.76 4098.83 3033.72ZM4097.03 3032.60L4097.06 3032.72L4098.54 3032.72C4098.60 3032.72 4098.64 3032.70 4098.65 3032.65C4098.51 3032.52 4098.30 3032.35 4098.30 3032.35L4098.10 3032.60ZM4100.46 3032.21L4101.03 3032.21L4101.03 3032.54L4101.08 3032.54C4101.20 3032.54 4101.33 3032.48 4101.33 3032.46L4101.33 3032.21L4101.84 3032.21L4101.84 3032.53L4101.89 3032.53C4102.01 3032.53 4102.14 3032.47 4102.14 3032.44L4102.14 3032.21L4102.74 3032.21C4102.79 3032.21 4102.83 3032.19 4102.84 3032.14C4102.72 3032.02 4102.51 3031.86 4102.51 3031.86L4102.33 3032.09L4102.14 3032.09L4102.14 3031.80C4102.24 3031.79 4102.28 3031.75 4102.29 3031.70L4101.84 3031.66L4101.84 3032.09L4101.33 3032.09L4101.33 3031.80C4101.43 3031.79 4101.46 3031.75 4101.48 3031.70L4101.03 3031.66L4101.03 3032.09L4100.43 3032.09ZM4100.05 3032.69L4100.56 3032.69C4100.61 3032.69 4100.65 3032.67 4100.66 3032.62C4100.54 3032.50 4100.33 3032.32 4100.33 3032.32L4100.14 3032.57L4100.05 3032.57L4100.05 3031.80C4100.15 3031.78 4100.18 3031.75 4100.19 3031.69L4099.74 3031.64L4099.74 3032.57L4099.15 3032.57L4099.18 3032.69L4099.69 3032.69C4099.60 3033.30 4099.41 3033.91 4099.10 3034.38L4099.16 3034.42C4099.40 3034.17 4099.59 3033.88 4099.74 3033.57L4099.74 3035.32L4099.80 3035.32C4099.92 3035.32 4100.05 3035.25 4100.05 3035.21L4100.05 3033.19C4100.16 3033.36 4100.28 3033.58 4100.32 3033.76C4100.57 3033.97 4100.82 3033.46 4100.05 3033.11ZM4100.98 3033.27L4102.20 3033.27L4102.20 3033.65L4100.98 3033.65ZM4102.20 3032.77L4102.20 3033.16L4100.98 3033.16L4100.98 3032.77ZM4102.75 3034.34C4102.80 3034.34 4102.84 3034.32 4102.86 3034.28C4102.72 3034.14 4102.49 3033.96 4102.49 3033.96L4102.29 3034.22L4101.68 3034.22C4101.71 3034.08 4101.72 3033.93 4101.73 3033.76L4102.20 3033.76L4102.20 3033.94L4102.25 3033.94C4102.35 3033.94 4102.50 3033.86 4102.51 3033.83L4102.51 3032.82C4102.58 3032.80 4102.64 3032.78 4102.66 3032.74L4102.32 3032.48L4102.16 3032.66L4101 3032.66L4100.67 3032.52L4100.67 3034L4100.72 3034C4100.84 3034 4100.98 3033.93 4100.98 3033.90L4100.98 3033.76L4101.39 3033.76C4101.38 3033.93 4101.37 3034.08 4101.34 3034.22L4100.31 3034.22L4100.34 3034.34L4101.31 3034.34C4101.20 3034.70 4100.91 3035.00 4100.14 3035.26L4100.18 3035.32C4101.19 3035.11 4101.53 3034.78 4101.66 3034.34L4101.68 3034.34C4101.78 3034.71 4102.02 3035.12 4102.66 3035.31C4102.67 3035.12 4102.77 3035.05 4102.94 3035.02L4102.94 3034.97C4102.23 3034.84 4101.90 3034.61 4101.77 3034.34ZM4104.68 3034.08C4104.44 3034.13 4104.22 3034.18 4104 3034.23L4104 3032.88L4104.56 3032.88C4104.61 3032.88 4104.65 3032.86 4104.66 3032.82C4104.54 3032.68 4104.34 3032.50 4104.34 3032.50L4104.16 3032.76L4104 3032.76L4104 3031.87C4104.10 3031.85 4104.14 3031.81 4104.15 3031.76L4103.68 3031.71L4103.68 3032.76L4103.12 3032.76L4103.16 3032.88L4103.68 3032.88L4103.68 3034.29C4103.44 3034.34 4103.24 3034.37 4103.11 3034.39L4103.30 3034.80C4103.34 3034.79 4103.38 3034.76 4103.39 3034.71C4103.98 3034.47 4104.40 3034.28 4104.69 3034.14ZM4105.47 3032.47L4106.02 3032.47L4106.02 3033.60L4105.42 3033.60C4105.46 3033.41 4105.47 3033.21 4105.47 3033ZM4106.40 3033.60L4106.33 3033.60L4106.33 3032.53C4106.41 3032.51 4106.47 3032.48 4106.50 3032.45L4106.15 3032.18L4105.98 3032.36L4105.47 3032.36L4105.47 3031.81C4105.58 3031.79 4105.61 3031.75 4105.62 3031.70L4105.15 3031.65L4105.15 3032.36L4104.48 3032.36L4104.51 3032.47L4105.15 3032.47L4105.15 3033C4105.15 3033.21 4105.14 3033.41 4105.11 3033.60L4104.18 3033.60L4104.21 3033.72L4105.09 3033.72C4104.97 3034.36 4104.62 3034.89 4103.78 3035.26L4103.81 3035.33C4104.84 3035 4105.26 3034.42 4105.40 3033.72L4105.42 3033.72C4105.53 3034.23 4105.80 3034.92 4106.58 3035.32C4106.60 3035.14 4106.70 3035.07 4106.87 3035.04L4106.88 3034.99C4106.02 3034.67 4105.64 3034.17 4105.50 3033.72L4106.80 3033.72C4106.86 3033.72 4106.90 3033.70 4106.90 3033.66C4106.78 3033.53 4106.58 3033.34 4106.58 3033.34Z","useTrueTypeFontRendering":true,"thickness":null,"width":null,"val":1},{"type":"text","svgpath":"M 4032.5 3048.96 L 4035.36 3053.25 M 4035.36 3048.96 L 4032.5 3053.25 M 4037.12 3048.96 L 4039.37 3048.96 L 4038.15 3050.6 L 4038.76 3050.6 L 4039.17 3050.8 L 4039.37 3051 L 4039.58 3051.62 L 4039.58 3052.03 L 4039.37 3052.64 L 4038.96 3053.05 L 4038.35 3053.25 L 4037.74 3053.25 L 4037.12 3053.05 L 4036.92 3052.85 L 4036.71 3052.44","useTrueTypeFontRendering":false,"thickness":0.6,"width":0.6,"ref":1},{"type":"text","svgpath":"M 4050.72 3070.82 L 4049.29 3070.82 L 4049.14 3072.11 L 4049.29 3071.97 L 4049.72 3071.82 L 4050.15 3071.82 L 4050.57 3071.97 L 4050.86 3072.25 L 4051 3072.68 L 4051 3072.97 L 4050.86 3073.4 L 4050.57 3073.69 L 4050.15 3073.83 L 4049.72 3073.83 L 4049.29 3073.69 L 4049.14 3073.54 L 4049 3073.26 M 4052.81 3070.82 L 4052.38 3070.96 L 4052.09 3071.39 L 4051.95 3072.11 L 4051.95 3072.54 L 4052.09 3073.26 L 4052.38 3073.69 L 4052.81 3073.83 L 4053.09 3073.83 L 4053.52 3073.69 L 4053.81 3073.26 L 4053.95 3072.54 L 4053.95 3072.11 L 4053.81 3071.39 L 4053.52 3070.96 L 4053.09 3070.82 L 4052.81 3070.82 M 4055.18 3070.82 L 4056.76 3070.82 L 4055.9 3071.97 L 4056.33 3071.97 L 4056.62 3072.11 L 4056.76 3072.25 L 4056.9 3072.68 L 4056.9 3072.97 L 4056.76 3073.4 L 4056.47 3073.69 L 4056.04 3073.83 L 4055.61 3073.83 L 4055.18 3073.69 L 4055.04 3073.54 L 4054.9 3073.26 M 4057.99 3071.54 L 4057.99 3071.39 L 4058.13 3071.11 L 4058.28 3070.96 L 4058.56 3070.82 L 4059.14 3070.82 L 4059.42 3070.96 L 4059.57 3071.11 L 4059.71 3071.39 L 4059.71 3071.68 L 4059.57 3071.97 L 4059.28 3072.4 L 4057.85 3073.83 L 4059.85 3073.83","useTrueTypeFontRendering":false,"thickness":0.3937,"width":0.3937},{"type":"text","svgpath":"M 4049.29 3066.32 L 4050.86 3066.32 L 4050 3067.47 L 4050.43 3067.47 L 4050.72 3067.61 L 4050.86 3067.75 L 4051 3068.18 L 4051 3068.47 L 4050.86 3068.9 L 4050.57 3069.19 L 4050.15 3069.33 L 4049.72 3069.33 L 4049.29 3069.19 L 4049.14 3069.04 L 4049 3068.76 M 4052.09 3067.04 L 4052.09 3066.89 L 4052.24 3066.61 L 4052.38 3066.46 L 4052.66 3066.32 L 4053.24 3066.32 L 4053.52 3066.46 L 4053.67 3066.61 L 4053.81 3066.89 L 4053.81 3067.18 L 4053.67 3067.47 L 4053.38 3067.9 L 4051.95 3069.33 L 4053.95 3069.33 M 4055.04 3067.04 L 4055.04 3066.89 L 4055.18 3066.61 L 4055.33 3066.46 L 4055.61 3066.32 L 4056.19 3066.32 L 4056.47 3066.46 L 4056.62 3066.61 L 4056.76 3066.89 L 4056.76 3067.18 L 4056.62 3067.47 L 4056.33 3067.9 L 4054.9 3069.33 L 4056.9 3069.33 M 4059.57 3066.32 L 4058.13 3066.32 L 4057.99 3067.61 L 4058.13 3067.47 L 4058.56 3067.32 L 4058.99 3067.32 L 4059.42 3067.47 L 4059.71 3067.75 L 4059.85 3068.18 L 4059.85 3068.47 L 4059.71 3068.9 L 4059.42 3069.19 L 4058.99 3069.33 L 4058.56 3069.33 L 4058.13 3069.19 L 4057.99 3069.04 L 4057.85 3068.76","useTrueTypeFontRendering":false,"thickness":0.3937,"width":0.3937},{"type":"text","svgpath":"M 4051 3075.32 L 4049.57 3078.33 M 4049 3075.32 L 4051 3075.32 M 4052.81 3075.32 L 4052.38 3075.46 L 4052.09 3075.89 L 4051.95 3076.61 L 4051.95 3077.04 L 4052.09 3077.76 L 4052.38 3078.19 L 4052.81 3078.33 L 4053.09 3078.33 L 4053.52 3078.19 L 4053.81 3077.76 L 4053.95 3077.04 L 4053.95 3076.61 L 4053.81 3075.89 L 4053.52 3075.46 L 4053.09 3075.32 L 4052.81 3075.32 M 4056.62 3075.32 L 4055.18 3075.32 L 4055.04 3076.61 L 4055.18 3076.47 L 4055.61 3076.32 L 4056.04 3076.32 L 4056.47 3076.47 L 4056.76 3076.75 L 4056.9 3077.18 L 4056.9 3077.47 L 4056.76 3077.9 L 4056.47 3078.19 L 4056.04 3078.33 L 4055.61 3078.33 L 4055.18 3078.19 L 4055.04 3078.04 L 4054.9 3077.76 M 4058.71 3075.32 L 4058.28 3075.46 L 4057.99 3075.89 L 4057.85 3076.61 L 4057.85 3077.04 L 4057.99 3077.76 L 4058.28 3078.19 L 4058.71 3078.33 L 4058.99 3078.33 L 4059.42 3078.19 L 4059.71 3077.76 L 4059.85 3077.04 L 4059.85 3076.61 L 4059.71 3075.89 L 4059.42 3075.46 L 4058.99 3075.32 L 4058.71 3075.32","useTrueTypeFontRendering":false,"thickness":0.3937,"width":0.3937},{"type":"text","svgpath":"M 4062 3051.75 L 4061.72 3051.46 L 4061.29 3051.32 L 4060.72 3051.32 L 4060.29 3051.46 L 4060 3051.75 L 4060 3052.04 L 4060.14 3052.32 L 4060.29 3052.47 L 4060.57 3052.61 L 4061.43 3052.9 L 4061.72 3053.04 L 4061.86 3053.18 L 4062 3053.47 L 4062 3053.9 L 4061.72 3054.19 L 4061.29 3054.33 L 4060.72 3054.33 L 4060.29 3054.19 L 4060 3053.9 M 4062.95 3051.32 L 4062.95 3054.33 M 4062.95 3051.32 L 4064.09 3054.33 M 4065.24 3051.32 L 4064.09 3054.33 M 4065.24 3051.32 L 4065.24 3054.33 M 4066.18 3051.32 L 4066.18 3054.33 M 4066.18 3051.32 L 4067.19 3051.32 L 4067.62 3051.46 L 4067.9 3051.75 L 4068.05 3052.04 L 4068.19 3052.47 L 4068.19 3053.18 L 4068.05 3053.61 L 4067.9 3053.9 L 4067.62 3054.19 L 4067.19 3054.33 L 4066.18 3054.33 M 4073.49 3052.04 L 4073.34 3051.75 L 4073.06 3051.46 L 4072.77 3051.32 L 4072.2 3051.32 L 4071.91 3051.46 L 4071.62 3051.75 L 4071.48 3052.04 L 4071.34 3052.47 L 4071.34 3053.18 L 4071.48 3053.61 L 4071.62 3053.9 L 4071.91 3054.19 L 4072.2 3054.33 L 4072.77 3054.33 L 4073.06 3054.19 L 4073.34 3053.9 L 4073.49 3053.61 M 4074.43 3052.32 L 4074.43 3054.33 M 4074.43 3053.18 L 4074.57 3052.75 L 4074.86 3052.47 L 4075.15 3052.32 L 4075.58 3052.32 M 4076.66 3052.32 L 4077.52 3054.33 M 4078.38 3052.32 L 4077.52 3054.33 L 4077.24 3054.9 L 4076.95 3055.19 L 4076.66 3055.33 L 4076.52 3055.33 M 4080.9 3052.75 L 4080.76 3052.47 L 4080.33 3052.32 L 4079.9 3052.32 L 4079.47 3052.47 L 4079.33 3052.75 L 4079.47 3053.04 L 4079.76 3053.18 L 4080.47 3053.33 L 4080.76 3053.47 L 4080.9 3053.76 L 4080.9 3053.9 L 4080.76 3054.19 L 4080.33 3054.33 L 4079.9 3054.33 L 4079.47 3054.19 L 4079.33 3053.9 M 4082.28 3051.32 L 4082.28 3053.76 L 4082.42 3054.19 L 4082.71 3054.33 L 4082.99 3054.33 M 4081.85 3052.32 L 4082.85 3052.32 M 4085.65 3052.32 L 4085.65 3054.33 M 4085.65 3052.75 L 4085.37 3052.47 L 4085.08 3052.32 L 4084.65 3052.32 L 4084.37 3052.47 L 4084.08 3052.75 L 4083.94 3053.18 L 4083.94 3053.47 L 4084.08 3053.9 L 4084.37 3054.19 L 4084.65 3054.33 L 4085.08 3054.33 L 4085.37 3054.19 L 4085.65 3053.9 M 4086.6 3051.32 L 4086.6 3054.33 M 4090.18 3051.32 L 4090.18 3053.76 L 4090.32 3054.19 L 4090.61 3054.33 L 4090.89 3054.33 M 4089.75 3052.32 L 4090.75 3052.32 M 4092.56 3052.32 L 4092.27 3052.47 L 4091.98 3052.75 L 4091.84 3053.18 L 4091.84 3053.47 L 4091.98 3053.9 L 4092.27 3054.19 L 4092.56 3054.33 L 4092.98 3054.33 L 4093.27 3054.19 L 4093.56 3053.9 L 4093.7 3053.47 L 4093.7 3053.18 L 4093.56 3052.75 L 4093.27 3052.47 L 4092.98 3052.32 L 4092.56 3052.32 M 4096.85 3051.32 L 4096.85 3054.33 M 4096.85 3051.32 L 4097.85 3051.32 L 4098.28 3051.46 L 4098.57 3051.75 L 4098.71 3052.04 L 4098.85 3052.47 L 4098.85 3053.18 L 4098.71 3053.61 L 4098.57 3053.9 L 4098.28 3054.19 L 4097.85 3054.33 L 4096.85 3054.33 M 4099.8 3051.32 L 4099.8 3054.33 M 4100.74 3051.32 L 4100.74 3054.33 M 4100.74 3051.32 L 4102.03 3051.32 L 4102.46 3051.46 L 4102.61 3051.61 L 4102.75 3051.89 L 4102.75 3052.32 L 4102.61 3052.61 L 4102.46 3052.75 L 4102.03 3052.9 L 4100.74 3052.9","useTrueTypeFontRendering":false,"thickness":0.3937,"width":0.3937},{"type":"text","svgpath":"M 4098 3067.32 L 4098.86 3069.33 M 4099.72 3067.32 L 4098.86 3069.33 M 4101.52 3066.32 L 4101.09 3066.46 L 4100.81 3066.89 L 4100.66 3067.61 L 4100.66 3068.04 L 4100.81 3068.76 L 4101.09 3069.19 L 4101.52 3069.33 L 4101.81 3069.33 L 4102.24 3069.19 L 4102.52 3068.76 L 4102.67 3068.04 L 4102.67 3067.61 L 4102.52 3066.89 L 4102.24 3066.46 L 4101.81 3066.32 L 4101.52 3066.32 M 4103.76 3068.61 L 4103.61 3068.76 L 4103.76 3068.9 L 4103.9 3068.76 L 4103.76 3068.61 M 4104.84 3066.89 L 4105.13 3066.75 L 4105.56 3066.32 L 4105.56 3069.33","useTrueTypeFontRendering":false,"thickness":0.3937,"width":0.3937},{"type":"text","svgpath":"M 4060.64 3082.54 L 4060.64 3082.39 L 4060.79 3082.11 L 4060.93 3081.96 L 4061.22 3081.82 L 4061.79 3081.82 L 4062.07 3081.96 L 4062.22 3082.11 L 4062.36 3082.39 L 4062.36 3082.68 L 4062.22 3082.97 L 4061.93 3083.4 L 4060.5 3084.83 L 4062.5 3084.83 M 4064.31 3081.82 L 4063.88 3081.96 L 4063.59 3082.39 L 4063.45 3083.11 L 4063.45 3083.54 L 4063.59 3084.26 L 4063.88 3084.69 L 4064.31 3084.83 L 4064.59 3084.83 L 4065.02 3084.69 L 4065.31 3084.26 L 4065.45 3083.54 L 4065.45 3083.11 L 4065.31 3082.39 L 4065.02 3081.96 L 4064.59 3081.82 L 4064.31 3081.82 M 4066.54 3082.54 L 4066.54 3082.39 L 4066.68 3082.11 L 4066.83 3081.96 L 4067.11 3081.82 L 4067.69 3081.82 L 4067.97 3081.96 L 4068.12 3082.11 L 4068.26 3082.39 L 4068.26 3082.68 L 4068.12 3082.97 L 4067.83 3083.4 L 4066.4 3084.83 L 4068.4 3084.83 M 4069.63 3081.82 L 4071.21 3081.82 L 4070.35 3082.97 L 4070.78 3082.97 L 4071.07 3083.11 L 4071.21 3083.25 L 4071.35 3083.68 L 4071.35 3083.97 L 4071.21 3084.4 L 4070.92 3084.69 L 4070.49 3084.83 L 4070.06 3084.83 L 4069.63 3084.69 L 4069.49 3084.54 L 4069.35 3084.26 M 4072.44 3084.11 L 4072.3 3084.26 L 4072.44 3084.4 L 4072.58 3084.26 L 4072.44 3084.11 M 4073.53 3082.39 L 4073.81 3082.25 L 4074.24 3081.82 L 4074.24 3084.83 M 4075.19 3082.39 L 4075.47 3082.25 L 4075.9 3081.82 L 4075.9 3084.83 M 4076.99 3084.11 L 4076.85 3084.26 L 4076.99 3084.4 L 4077.14 3084.26 L 4076.99 3084.11 M 4078.37 3081.82 L 4079.94 3081.82 L 4079.08 3082.97 L 4079.51 3082.97 L 4079.8 3083.11 L 4079.94 3083.25 L 4080.08 3083.68 L 4080.08 3083.97 L 4079.94 3084.4 L 4079.66 3084.69 L 4079.23 3084.83 L 4078.8 3084.83 L 4078.37 3084.69 L 4078.22 3084.54 L 4078.08 3084.26 M 4083.23 3081.82 L 4083.23 3084.83 M 4083.23 3081.82 L 4084.24 3081.82 L 4084.67 3081.96 L 4084.95 3082.25 L 4085.1 3082.54 L 4085.24 3082.97 L 4085.24 3083.68 L 4085.1 3084.11 L 4084.95 3084.4 L 4084.67 3084.69 L 4084.24 3084.83 L 4083.23 3084.83 M 4086.18 3083.68 L 4087.9 3083.68 L 4087.9 3083.4 L 4087.76 3083.11 L 4087.62 3082.97 L 4087.33 3082.82 L 4086.9 3082.82 L 4086.61 3082.97 L 4086.33 3083.25 L 4086.18 3083.68 L 4086.18 3083.97 L 4086.33 3084.4 L 4086.61 3084.69 L 4086.9 3084.83 L 4087.33 3084.83 L 4087.62 3084.69 L 4087.9 3084.4 M 4088.85 3082.82 L 4088.85 3084.83 M 4088.85 3083.4 L 4089.28 3082.97 L 4089.56 3082.82 L 4089.99 3082.82 L 4090.28 3082.97 L 4090.42 3083.4 L 4090.42 3084.83 M 4091.94 3081.82 L 4092.08 3081.96 L 4092.23 3081.82 L 4092.08 3081.68 L 4091.94 3081.82 M 4092.08 3082.82 L 4092.08 3085.26 L 4091.94 3085.69 L 4091.65 3085.83 L 4091.37 3085.83 M 4093.17 3081.82 L 4093.17 3084.83 M 4093.17 3083.4 L 4093.6 3082.97 L 4093.89 3082.82 L 4094.32 3082.82 L 4094.6 3082.97 L 4094.74 3083.4 L 4094.74 3084.83 M 4097.41 3082.82 L 4097.41 3084.83 M 4097.41 3083.25 L 4097.12 3082.97 L 4096.83 3082.82 L 4096.41 3082.82 L 4096.12 3082.97 L 4095.83 3083.25 L 4095.69 3083.68 L 4095.69 3083.97 L 4095.83 3084.4 L 4096.12 3084.69 L 4096.41 3084.83 L 4096.83 3084.83 L 4097.12 3084.69 L 4097.41 3084.4 M 4098.35 3082.82 L 4098.35 3084.83 M 4098.35 3083.4 L 4098.78 3082.97 L 4099.07 3082.82 L 4099.5 3082.82 L 4099.78 3082.97 L 4099.93 3083.4 L 4099.93 3084.83 M 4102.59 3082.82 L 4102.59 3085.11 L 4102.45 3085.54 L 4102.3 3085.69 L 4102.02 3085.83 L 4101.59 3085.83 L 4101.3 3085.69 M 4102.59 3083.25 L 4102.3 3082.97 L 4102.02 3082.82 L 4101.59 3082.82 L 4101.3 3082.97 L 4101.02 3083.25 L 4100.87 3083.68 L 4100.87 3083.97 L 4101.02 3084.4 L 4101.3 3084.69 L 4101.59 3084.83 L 4102.02 3084.83 L 4102.3 3084.69 L 4102.59 3084.4","useTrueTypeFontRendering":false,"thickness":0.3937,"width":0.3937}],"B":[]},"fabrication":{"F":[],"B":[]}},"footprints":[{"ref":"X1","center":[4080.3236,3068.2828],"bbox":{"pos":[4080.3236,3068.2828],"angle":0,"relpos":[-10.039900000000216,-7.283750000000055],"size":[19.88239999999996,15.551750000000084]},"pads":[{"layers":["F"],"pos":[4075.3236,3072.6138],"size":[6.2992,5.9055],"angle":0,"pin1":1,"shape":"rect","type":"smd","drillsize":[0,0],"holeCenterPoint":{"x":4075.3235,"y":3072.6138},"polygon":[{"x":4072.174,"y":3069.6608},{"x":4078.4732,"y":3069.6608},{"x":4078.4732,"y":3075.5663},{"x":4072.174,"y":3075.5663}],"net":""},{"layers":["F"],"pos":[4085.3236,3072.6138],"size":[6.2992,5.9055],"angle":0,"shape":"rect","type":"smd","drillsize":[0,0],"holeCenterPoint":{"x":4085.3235,"y":3072.6138},"polygon":[{"x":4082.174,"y":3069.6608},{"x":4088.4732,"y":3069.6608},{"x":4088.4732,"y":3075.5663},{"x":4082.174,"y":3075.5663}],"net":"GND"},{"layers":["F"],"pos":[4085.3236,3063.9518],"size":[6.2992,5.9055],"angle":-180,"shape":"rect","type":"smd","drillsize":[0,0],"holeCenterPoint":{"x":4085.3235,"y":3063.9518},"polygon":[{"x":4088.4732,"y":3066.9049},{"x":4082.174,"y":3066.9049},{"x":4082.174,"y":3060.9994},{"x":4088.4732,"y":3060.9994}],"net":"OUT"},{"layers":["F"],"pos":[4075.3236,3063.9518],"size":[6.2992,5.9055],"angle":0,"shape":"rect","type":"smd","drillsize":[0,0],"holeCenterPoint":{"x":4075.3235,"y":3063.9518},"polygon":[{"x":4072.174,"y":3060.9994},{"x":4078.4732,"y":3060.9994},{"x":4078.4732,"y":3066.9049},{"x":4072.174,"y":3066.9049}],"net":"VCC"}],"drawings":[],"layer":"F"},{"ref":"X2","center":[4080.675,3068.325],"bbox":{"pos":[4080.675,3068.325],"angle":0,"relpos":[-15.73700000000008,-11.529899999999998],"size":[30.57400000000007,23.959800000000087]},"pads":[{"layers":["F"],"pos":[4070.281,3076.002],"size":[7.0866,5.9055],"angle":0,"pin1":1,"shape":"rect","type":"smd","drillsize":[0,0],"holeCenterPoint":{"x":4070.2813,"y":3076.0022},"polygon":[{"x":4073.8246,"y":3078.9549},{"x":4073.8246,"y":3073.0494},{"x":4066.738,"y":3073.0494},{"x":4066.738,"y":3078.9549}],"net":"S$3646"},{"layers":["F"],"pos":[4091.069,3076.002],"size":[7.0866,5.9055],"angle":0,"shape":"rect","type":"smd","drillsize":[0,0],"holeCenterPoint":{"x":4091.0687,"y":3076.0022},"polygon":[{"x":4087.5254,"y":3078.9549},{"x":4087.5254,"y":3073.0494},{"x":4094.612,"y":3073.0494},{"x":4094.612,"y":3078.9549}],"net":"GND"},{"layers":["F"],"pos":[4091.069,3060.648],"size":[7.0866,5.9055],"angle":0,"shape":"rect","type":"smd","drillsize":[0,0],"holeCenterPoint":{"x":4091.0687,"y":3060.6478},"polygon":[{"x":4087.5254,"y":3057.6951},{"x":4087.5254,"y":3063.6006},{"x":4094.612,"y":3063.6006},{"x":4094.612,"y":3057.6951}],"net":"OUT"},{"layers":["F"],"pos":[4070.281,3060.648],"size":[7.0866,5.9055],"angle":0,"shape":"rect","type":"smd","drillsize":[0,0],"holeCenterPoint":{"x":4070.2813,"y":3060.6478},"polygon":[{"x":4073.8246,"y":3057.6951},{"x":4073.8246,"y":3063.6006},{"x":4066.738,"y":3063.6006},{"x":4066.738,"y":3057.6951}],"net":"VCC"}],"drawings":[],"layer":"F"},{"ref":"X3","center":[4081.5,3067.5],"bbox":{"pos":[4081.5,3067.5],"angle":0,"relpos":[-35.5,-17.25],"size":[68.25,37.25]},"pads":[{"layers":["F","B"],"pos":[4051.5,3053],"size":[5.5,5.5],"angle":0,"shape":"oval","type":"th","drillsize":[2.8,2.8],"holeCenterPoint":{"x":4051.5,"y":3053},"polygon":[],"net":"VCC"},{"layers":["F","B"],"pos":[4111.5,3053],"size":[5.5,5.5],"angle":0,"shape":"oval","type":"th","drillsize":[2.8,2.8],"holeCenterPoint":{"x":4111.5,"y":3053},"polygon":[],"net":"OUT"},{"layers":["F","B"],"pos":[4111.5,3083],"size":[5.5,5.5],"angle":0,"shape":"oval","type":"th","drillsize":[2.8,2.8],"holeCenterPoint":{"x":4111.5,"y":3083},"polygon":[],"net":"GND"},{"layers":["F","B"],"pos":[4051.5,3083],"size":[5.5,5.5],"angle":0,"pin1":1,"shape":"rect","type":"th","drillsize":[2.8,2.8],"holeCenterPoint":{"x":4051.5,"y":3083},"polygon":[{"x":4048.75,"y":3080.25},{"x":4054.25,"y":3080.25},{"x":4054.25,"y":3085.75},{"x":4048.75,"y":3085.75}],"net":"S$3646"}],"drawings":[],"layer":"F"}],"metadata":{"title":"PCB_贴片有源晶振转直插","revision":"0","company":"Unknown Company","date":"2023-11-03"},"tracks":{"F":[{"type":"polyline","net":"OUT","start":[0,0],"end":[0,0],"width":1.9685,"svgpath":"M4091.069,3060.648 4103.852,3060.648 4111.5,3053"},{"type":"polyline","net":"GND","start":[0,0],"end":[0,0],"width":1.9685,"svgpath":"M4091.069,3076.002 4104.502,3076.002 4111.5,3083"},{"type":"polyline","net":"S$3646","start":[0,0],"end":[0,0],"width":1.9685,"svgpath":"M4070.281,3076.002 4063.283,3083 4051.5,3083"},{"type":"polyline","net":"VCC","start":[0,0],"end":[0,0],"width":1.9685,"svgpath":"M4070.281,3060.648 4059.148,3060.648 4051.5,3053"}],"B":[]},"zones":{"F":[],"B":[]},"pads":[],"nets":["GND","OUT","VCC","S$3646"],"bom":{"both":[[1,"4.9152MHz","OSC-SMD_4P-L5.0-W3.2-BL_SIT1602AI",[["X1",0]],[" "," "," "," "]],[1,"60MHz","OSC-SMD_4P-L7.0-W5.0-BL",[["X2",1]],[" "," "," "," "]],[1,"长方形晶振模块","长方形晶振模块",[["X3",2]],[" "," "," "," "]]],"F":[[1,"4.9152MHz","OSC-SMD_4P-L5.0-W3.2-BL_SIT1602AI",[["X1",0]],[" "," "," "," "]],[1,"60MHz","OSC-SMD_4P-L7.0-W5.0-BL",[["X2",1]],[" "," "," "," "]],[1,"长方形晶振模块","长方形晶振模块",[["X3",2]],[" "," "," "," "]]],"B":[],"skipped":[],"customColumns":[]}};
+///////////////////////////////////////////////
+
+///////////////////////////////////////////////
+/* Utility functions */
+
+var storagePrefix = 'ibom__' + pcbdata.metadata.title + '__' +
+  pcbdata.metadata.revision + '__#';
+
+function buildKeyForLocalStorageDict() {  
+  return storagePrefix;
+}
+
+var storage;
+var _isLocalStorageUsed = false;
+
+function initStorage(key) {
+  try {
+    window.localStorage.getItem("blank");
+    storage = window.localStorage;    
+    _isLocalStorageUsed = true;
+  } catch (e) {
+    // localStorage not available
+  }
+  if (!storage) {
+    try {
+      window.sessionStorage.getItem("blank");
+      storage = window.sessionStorage;      
+    } catch (e) {
+      // sessionStorage also not available
+    }
+  }
+}
+
+
+
+function readStorage(key) {
+  if(!storage) {
+    return null;
+  }
+
+  if(!_isLocalStorageUsed) {    
+    return storage.getItem(storagePrefix + key);
+  }
+
+  try {
+    var dictKey = buildKeyForLocalStorageDict();
+    var obj = JSON.parse(storage.getItem(dictKey));    
+    if(!obj || !obj.hasOwnProperty(key)) {
+      return null;
+    }
+
+    return JSON.parse(storage.getItem(dictKey))[key];
+  } catch(e) {
+    console.log('[ibom]: Unable to obtain a value from local storage!');
+    console.log(e);
+  }
+  
+  // Original implementation
+  // return storage.getItem(storagePrefix + key);
+}
+
+
+function writeStorage(key, value) {
+  if(!storage) {
+    return;
+  }
+
+  if(!_isLocalStorageUsed) {
+    storage.setItem(storagePrefix + key, value);
+    return;
+  }
+
+  try {
+    var dictKey = buildKeyForLocalStorageDict();
+    if(!storage.getItem(dictKey)) {
+      storage.setItem(dictKey,JSON.stringify({
+        _storagePrefix: storagePrefix
+      }));
+    }
+
+    var obj = JSON.parse(storage.getItem(dictKey));
+    obj[key] = value;
+    storage.setItem(dictKey,JSON.stringify(obj));            
+  } catch(e) {
+    console.log('[ibom]: Unable to write key to local storage!');
+    console.log(e);
+  }
+  
+  // Original implementation
+  // storage.setItem(storagePrefix + key, value);
+}
+
+function fancyDblClickHandler(el, onsingle, ondouble) {
+  return function() {
+    if (el.getAttribute("data-dblclick") == null) {
+      el.setAttribute("data-dblclick", 1);
+      setTimeout(function() {
+        if (el.getAttribute("data-dblclick") == 1) {
+          onsingle();
+        }
+        el.removeAttribute("data-dblclick");
+      }, 200);
+    } else {
+      el.removeAttribute("data-dblclick");
+      ondouble();
+    }
+  }
+}
+
+function smoothScrollToRow(rowid) {
+  document.getElementById(rowid).scrollIntoView({
+    behavior: "smooth",
+    block: "center",
+    inline: "nearest"
+  });
+}
+
+function focusInputField(input) {
+  input.scrollIntoView(false);
+  input.focus();
+  input.select();
+}
+
+function copyToClipboard() {
+  var text = '';
+  for (var node of bomhead.childNodes[0].childNodes) {
+    if (node.firstChild) {
+      text = text + node.firstChild.nodeValue;
+    }
+    if (node != bomhead.childNodes[0].lastChild) {
+      text += '\t';
+    }
+  }
+  text += '\n';
+  for (var row of bombody.childNodes) {
+    for (var cell of row.childNodes) {
+      for (var node of cell.childNodes) {
+        if (node.nodeName == "INPUT") {
+          if (node.checked) {
+            text = text + '✓';
+          }
+        } else if (node.nodeName == "MARK") {
+          text = text + node.firstChild.nodeValue;
+        } else {
+          text = text + node.nodeValue;
+        }
+      }
+      if (cell != row.lastChild) {
+        text += '\t';
+      }
+    }
+    text += '\n';
+  }
+  var textArea = document.createElement("textarea");
+  textArea.classList.add('clipboard-temp');
+  textArea.value = text;
+
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+
+  try {
+    if (document.execCommand('copy')) {
+      console.log('Bom copied to clipboard.');
+    }
+  } catch (err) {
+    console.log('Can not copy to clipboard.');
+  }
+
+  document.body.removeChild(textArea);
+}
+
+function removeGutterNode(node) {
+  for (var i = 0; i < node.childNodes.length; i++) {
+    if (node.childNodes[i].classList &&
+      node.childNodes[i].classList.contains("gutter")) {
+      node.removeChild(node.childNodes[i]);
+      break;
+    }
+  }
+}
+
+function cleanGutters() {
+  removeGutterNode(document.getElementById("bot"));
+  removeGutterNode(document.getElementById("canvasdiv"));
+}
+
+var units = {
+  prefixes: {
+    giga: ["G", "g", "giga", "Giga", "GIGA"],
+    mega: ["M", "mega", "Mega", "MEGA"],
+    kilo: ["K", "k", "kilo", "Kilo", "KILO"],
+    milli: ["m", "milli", "Milli", "MILLI"],
+    micro: ["U", "u", "micro", "Micro", "MICRO", "μ", "µ"], // different utf8 μ
+    nano: ["N", "n", "nano", "Nano", "NANO"],
+    pico: ["P", "p", "pico", "Pico", "PICO"],
+  },
+  unitsShort: ["R", "r", "Ω", "F", "f", "H", "h"],
+  unitsLong: [
+    "OHM", "Ohm", "ohm", "ohms",
+    "FARAD", "Farad", "farad",
+    "HENRY", "Henry", "henry"
+  ],
+  getMultiplier: function(s) {
+    if (this.prefixes.giga.includes(s)) return 1e9;
+    if (this.prefixes.mega.includes(s)) return 1e6;
+    if (this.prefixes.kilo.includes(s)) return 1e3;
+    if (this.prefixes.milli.includes(s)) return 1e-3;
+    if (this.prefixes.micro.includes(s)) return 1e-6;
+    if (this.prefixes.nano.includes(s)) return 1e-9;
+    if (this.prefixes.pico.includes(s)) return 1e-12;
+    return 1;
+  },
+  valueRegex: null,
+}
+
+function initUtils() {
+  var allPrefixes = units.prefixes.giga
+                    .concat(units.prefixes.mega)
+                    .concat(units.prefixes.kilo)
+                    .concat(units.prefixes.milli)
+                    .concat(units.prefixes.micro)
+                    .concat(units.prefixes.nano)
+                    .concat(units.prefixes.pico);
+  var allUnits = units.unitsShort.concat(units.unitsLong);
+  units.valueRegex = new RegExp("^([0-9\.]+)" +
+                         "\\s*(" + allPrefixes.join("|") + ")?" +
+                         "(" + allUnits.join("|") + ")?" +
+                         "(\\b.*)?$", "");
+  units.valueAltRegex = new RegExp("^([0-9]*)" +
+                         "(" + units.unitsShort.join("|") + ")?" +
+                         "([GgMmKkUuNnPp])?" +
+                         "([0-9]*)" +
+                         "(\\b.*)?$", "");
+  for (var bom_type of ["both", "F", "B"]) {
+    for (var row of pcbdata.bom[bom_type]) {
+      row.push(parseValue(row[1], row[3][0][0]));
+    }
+  }
+}
+
+function parseValue(val, ref) {
+  var inferUnit = (unit, ref) => {
+    if (unit) {
+      unit = unit.toLowerCase();
+      if (unit == 'Ω' || unit == "ohm" || unit == "ohms") {
+        unit = 'r';
+      }
+      unit = unit[0];
+    } else {
+      ref = /^([a-z]+)\d+$/i.exec(ref);
+      if (ref) {
+        ref = ref[1].toLowerCase();
+        if (ref == "c") unit = 'f';
+        else if (ref == "l") unit = 'h';
+        else if (ref == "r" || ref == "rv") unit = 'r';
+        else unit = null;
+      }
+    }
+    return unit;
+  };
+  val = val.replace(/,/g, "");
+  var match = units.valueRegex.exec(val);
+  var unit;
+  if (match) {
+    val = parseFloat(match[1]);
+    if (match[2]) {
+      val = val * units.getMultiplier(match[2]);
+    }
+    unit = inferUnit(match[3], ref);
+    if (!unit) return null;
+    else return {
+      val: val,
+      unit: unit,
+      extra: match[4],
+    }
+  }
+  match = units.valueAltRegex.exec(val);
+  if (match && (match[1] || match[4])) {
+    val = parseFloat(match[1] + "." + match[4]);
+    if (match[3]) {
+      val = val * units.getMultiplier(match[3]);
+    }
+    unit = inferUnit(match[2], ref);
+    if (!unit) return null;
+    else return {
+      val: val,
+      unit: unit,
+      extra: match[5],
+    }
+  }
+  return null;
+}
+
+function valueCompare(a, b, stra, strb) {
+  if (a === null && b === null) {
+    // Failed to parse both values, compare them as strings.
+    if (stra != strb) return stra > strb ? 1 : -1;
+    else return 0;
+  } else if (a === null) {
+    return 1;
+  } else if (b === null) {
+    return -1;
+  } else {
+    if (a.unit != b.unit) return a.unit > b.unit ? 1 : -1;
+    else if (a.val != b.val) return a.val > b.val ? 1 : -1;
+    else if (a.extra != b.extra) return a.extra > b.extra ? 1 : -1;
+    else return 0;
+  }
+}
+
+function validateSaveImgDimension(element) {
+  var valid = false;
+  var intValue = 0;
+  if (/^[1-9]\d*$/.test(element.value)) {
+    intValue = parseInt(element.value);
+    if (intValue <= 16000) {
+      valid = true;
+    }
+  }
+  if (valid) {
+    element.classList.remove("invalid");
+  } else {
+    element.classList.add("invalid");
+  }
+  return intValue;
+}
+
+function saveImage(layer) {
+  var width = validateSaveImgDimension(document.getElementById("render-save-width"));
+  var height = validateSaveImgDimension(document.getElementById("render-save-height"));
+  var bgcolor = null;
+  if (!document.getElementById("render-save-transparent").checked) {
+    var style = getComputedStyle(topmostdiv);
+    bgcolor = style.getPropertyValue("background-color");
+  }
+  if (!width || !height) return;
+
+  // Prepare image
+  var canvas = document.createElement("canvas");
+  var layerdict = {
+    transform: {
+      x: 0,
+      y: 0,
+      s: 1,
+      panx: 0,
+      pany: 0,
+      zoom: 1,
+    },
+    bg: canvas,
+    fab: canvas,
+    silk: canvas,
+    highlight: canvas,
+    layer: layer,
+  }
+  // Do the rendering
+  recalcLayerScale(layerdict, width, height);
+  prepareLayer(layerdict);
+  clearCanvas(canvas, bgcolor);
+  drawBackground(layerdict, false);
+  drawHighlightsOnLayer(layerdict, false);
+
+  // Save image
+  var imgdata = canvas.toDataURL("image/png");
+
+  var filename = pcbdata.metadata.title;
+  if (pcbdata.metadata.revision) {
+    filename += `.${pcbdata.metadata.revision}`;
+  }
+  filename += `.${layer}.png`;
+  saveFile(filename, dataURLtoBlob(imgdata));
+}
+
+function saveSettings() {
+  var data = {
+    type: "InteractiveHtmlBom settings",
+    version: 1,
+    pcbmetadata: pcbdata.metadata,
+    settings: settings,
+  }
+  var blob = new Blob([JSON.stringify(data, null, 4)], {type: "application/json"});
+  saveFile(`${pcbdata.metadata.title}.settings.json`, blob);
+}
+
+function loadSettings() {
+  var input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".settings.json";
+  input.onchange = function(e) {
+    var file = e.target.files[0];
+    var reader = new FileReader();
+    reader.onload = readerEvent => {
+      var content = readerEvent.target.result;
+      var newSettings;
+      try {
+        newSettings = JSON.parse(content);
+      } catch(e) {
+        alert("Selected file is not InteractiveHtmlBom settings file.");
+        return;
+      }
+      if (newSettings.type != "InteractiveHtmlBom settings") {
+        alert("Selected file is not InteractiveHtmlBom settings file.");
+        return;
+      }
+      var metadataMatches = newSettings.hasOwnProperty("pcbmetadata");
+      if (metadataMatches) {
+        for (var k in pcbdata.metadata) {
+          if (!newSettings.pcbmetadata.hasOwnProperty(k) || newSettings.pcbmetadata[k] != pcbdata.metadata[k]) {
+            metadataMatches = false;
+          }
+        }
+      }
+      if (!metadataMatches) {
+        var currentMetadata = JSON.stringify(pcbdata.metadata, null, 4);
+        var fileMetadata = JSON.stringify(newSettings.pcbmetadata, null, 4);
+        if (!confirm(
+          `Settins file metadata does not match current metadata.\n\n` +
+          `Page metadata:\n${currentMetadata}\n\n` +
+          `Settings file metadata:\n${fileMetadata}\n\n` +
+          `Press OK if you would like to import settings anyway.`)) {
+          return;
+        }
+      }
+      overwriteSettings(newSettings.settings);
+    }
+    reader.readAsText(file, 'UTF-8');
+  }
+  input.click();
+}
+
+function overwriteSettings(newSettings) {
+
+  initDone = false;
+  Object.assign(settings, newSettings);
+  writeStorage("bomlayout", settings.bomlayout);
+  writeStorage("bommode", settings.bommode);
+  writeStorage("canvaslayout", settings.canvaslayout);
+  writeStorage("bomCheckboxes", settings.checkboxes.join(","));
+  document.getElementById("bomCheckboxes").value = settings.checkboxes.join(",");
+  for (var checkbox of settings.checkboxes) {
+    writeStorage("checkbox_" + checkbox, settings.checkboxStoredRefs[checkbox]);
+  }
+  writeStorage("darkenWhenChecked", settings.darkenWhenChecked);
+  padsVisible(settings.renderPads);
+  document.getElementById("padsCheckbox").checked = settings.renderPads;
+  fabricationVisible(settings.renderFabrication);
+  document.getElementById("fabricationCheckbox").checked = settings.renderFabrication;
+  silkscreenVisible(settings.renderSilkscreen);
+  document.getElementById("silkscreenCheckbox").checked = settings.renderSilkscreen;
+  referencesVisible(settings.renderReferences);
+  document.getElementById("referencesCheckbox").checked = settings.renderReferences;
+  valuesVisible(settings.renderValues);
+  document.getElementById("valuesCheckbox").checked = settings.renderValues;
+  tracksVisible(settings.renderTracks);
+  document.getElementById("tracksCheckbox").checked = settings.renderTracks;
+  zonesVisible(settings.renderZones);
+  document.getElementById("zonesCheckbox").checked = settings.renderZones;
+  dnpOutline(settings.renderDnpOutline);
+  document.getElementById("dnpOutlineCheckbox").checked = settings.renderDnpOutline;
+  setRedrawOnDrag(settings.redrawOnDrag);
+  document.getElementById("dragCheckbox").checked = settings.redrawOnDrag;
+  setShowCrosshair(settings.showCrosshair);
+  document.getElementById("crosshairCheckbox").checked = settings.showCrosshair;
+  setDarkMode(settings.darkMode);
+  document.getElementById("darkmodeCheckbox").checked = settings.darkMode;
+  setHighlightPin1(settings.highlightpin1);
+  document.getElementById("highlightpin1Checkbox").checked = settings.highlightpin1;
+  writeStorage("boardRotation", settings.boardRotation);
+  document.getElementById("boardRotation").value = settings.boardRotation / 5;
+  document.getElementById("rotationDegree").textContent = settings.boardRotation;
+  initDone = true;
+  prepCheckboxes();
+  changeBomLayout(settings.bomlayout);
+}
+
+function saveFile(filename, blob) {
+  var link = document.createElement("a");
+  var objurl = URL.createObjectURL(blob);
+  link.download = filename;
+  link.href = objurl;
+  link.click();
+}
+
+function dataURLtoBlob(dataurl) {
+  var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+      bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+  while(n--){
+      u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new Blob([u8arr], {type:mime});
+}
+
+var settings = {
+  canvaslayout: "default",
+  bomlayout: "default",
+  bommode: "grouped",
+  checkboxes: [],
+  checkboxStoredRefs: {},
+  darkMode: false,
+  highlightpin1: false,
+  redrawOnDrag: true,
+  boardRotation: 0,
+  renderPads: true,
+  renderReferences: true,
+  renderValues: true,
+  renderSilkscreen: true,
+  renderFabrication: true,
+  renderDnpOutline: false,
+  renderTracks: true,
+  renderZones: true,
+}
+
+function initDefaults() {
+  settings.bomlayout = readStorage("bomlayout");
+  if (settings.bomlayout === null) {
+    settings.bomlayout = config.bom_view;
+  }
+  if (!['bom-only', 'left-right', 'top-bottom'].includes(settings.bomlayout)) {
+    settings.bomlayout = config.bom_view;
+  }
+  settings.bommode = readStorage("bommode");
+  if (settings.bommode === null) {
+    settings.bommode = "grouped";
+  }
+  if (!["grouped", "ungrouped", "netlist"].includes(settings.bommode)) {
+    settings.bommode = "grouped";
+  }
+  settings.canvaslayout = readStorage("canvaslayout");
+  if (settings.canvaslayout === null) {
+    settings.canvaslayout = config.layer_view;
+  }
+  var bomCheckboxes = readStorage("bomCheckboxes");
+  if (bomCheckboxes === null) {
+    bomCheckboxes = config.checkboxes;
+  }
+  settings.checkboxes = bomCheckboxes.split(",").filter((e) => e);
+  document.getElementById("bomCheckboxes").value = bomCheckboxes;
+
+  settings.darkenWhenChecked = readStorage("darkenWhenChecked") || "";
+  populateDarkenWhenCheckedOptions();
+
+  function initBooleanSetting(storageString, def, elementId, func) {    
+    var b = readStorage(storageString);
+    if (b === null) {
+      b = def;
+    } else {
+      b = (b === true);
+    }
+    document.getElementById(elementId).checked = b;
+    func(b);
+  }
+
+  initBooleanSetting("padsVisible", config.show_pads, "padsCheckbox", padsVisible);
+  initBooleanSetting("fabricationVisible", config.show_fabrication, "fabricationCheckbox", fabricationVisible);
+  initBooleanSetting("silkscreenVisible", config.show_silkscreen, "silkscreenCheckbox", silkscreenVisible);
+  initBooleanSetting("referencesVisible", true, "referencesCheckbox", referencesVisible);
+  initBooleanSetting("valuesVisible", false, "valuesCheckbox", valuesVisible);
+  if ("tracks" in pcbdata) {
+    initBooleanSetting("tracksVisible", true, "tracksCheckbox", tracksVisible);
+    initBooleanSetting("zonesVisible", true, "zonesCheckbox", zonesVisible);
+  } else {
+    document.getElementById("tracksAndZonesCheckboxes").style.display = "none";
+    tracksVisible(false);
+    zonesVisible(false);
+  }
+  initBooleanSetting("dnpOutline", false, "dnpOutlineCheckbox", dnpOutline);
+  initBooleanSetting("redrawOnDrag", config.redraw_on_drag, "dragCheckbox", setRedrawOnDrag);
+  initBooleanSetting("showCrosshair", config.show_crosshair, "crosshairCheckbox", setShowCrosshair);
+  initBooleanSetting("darkmode", config.dark_mode, "darkmodeCheckbox", setDarkMode);
+  initBooleanSetting("highlightpin1", config.highlight_pin1, "highlightpin1Checkbox", setHighlightPin1);
+  settings.boardRotation = readStorage("boardRotation");
+  if (settings.boardRotation === null) {
+    settings.boardRotation = config.board_rotation * 5;
+  } else {
+    settings.boardRotation = parseInt(settings.boardRotation);
+  }
+  document.getElementById("boardRotation").value = settings.boardRotation / 5;
+  document.getElementById("rotationDegree").textContent = settings.boardRotation;
+}
+
+// Helper classes for user js callbacks.
+
+const IBOM_EVENT_TYPES = {
+  ALL: "all",
+  HIGHLIGHT_EVENT: "highlightEvent",
+  CHECKBOX_CHANGE_EVENT: "checkboxChangeEvent",
+  BOM_BODY_CHANGE_EVENT: "bomBodyChangeEvent",
+}
+
+const EventHandler = {
+  callbacks: {},
+  init: function() {
+    for (eventType of Object.values(IBOM_EVENT_TYPES))
+      this.callbacks[eventType] = [];
+  },
+  registerCallback: function(eventType, callback) {
+    this.callbacks[eventType].push(callback);
+  },
+  emitEvent: function(eventType, eventArgs) {
+    event = {
+      eventType: eventType,
+      args: eventArgs,
+    }
+    var callback;
+    for(callback of this.callbacks[eventType])
+      callback(event);
+    for(callback of this.callbacks[IBOM_EVENT_TYPES.ALL])
+      callback(event);
+  }
+}
+EventHandler.init();
+
+///////////////////////////////////////////////
+
+///////////////////////////////////////////////
+/* PCB rendering code */
+
+var emptyContext2d = document.createElement("canvas").getContext("2d");
+var hitTestContext2d = document.createElement("canvas").getContext("2d");
+
+function deg2rad(deg) {
+  return deg * Math.PI / 180;
+}
+
+function calcFontPoint(linepoint, text, offsetx, offsety, tilt) {
+  var point = [
+    linepoint[0] * text.width + offsetx,
+    linepoint[1] * text.height + offsety
+  ];
+  // This approximates pcbnew behavior with how text tilts depending on horizontal justification
+  point[0] -= (linepoint[1] + 0.5 * (1 + text.justify[0])) * text.height * tilt;
+  return point;
+}
+
+function drawText(ctx, text, color) {
+  if ("ref" in text && !settings.renderReferences) return;
+  if ("val" in text && !settings.renderValues) return;
+  ctx.save();
+  ctx.fillStyle = color;
+  ctx.strokeStyle = color;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.lineWidth = text.thickness;
+
+  if ("svgpath" in text) {    
+    // TODO: This path must be cached!
+    const path = new Path2D(text.svgpath);
+    if(text.useTrueTypeFontRendering) {            
+      ctx.fill(path);
+    } else {
+      ctx.stroke(path);
+    }
+    
+    ctx.restore();
+    return;
+  }
+
+  ctx.translate(...text.pos);
+  ctx.translate(text.thickness * 0.5, 0);
+  var angle = -text.angle;
+  if (text.attr.includes("mirrored")) {
+    ctx.scale(-1, 1);
+    angle = -angle;
+  }
+  var tilt = 0;
+  if (text.attr.includes("italic")) {
+    tilt = 0.125;
+  }
+  var interline = text.height * 1.5 + text.thickness;
+  var txt = text.text.split("\n");
+  // KiCad ignores last empty line.
+  if (txt[txt.length - 1] == '') txt.pop();
+  ctx.rotate(deg2rad(angle));
+  var offsety = (1 - text.justify[1]) / 2 * text.height; // One line offset
+  offsety -= (txt.length - 1) * (text.justify[1] + 1) / 2 * interline; // Multiline offset
+  for (var i in txt) {
+    var lineWidth = text.thickness + interline / 2 * tilt;
+    for (var j = 0; j < txt[i].length; j++) {
+      if (txt[i][j] == '\t') {
+        var fourSpaces = 4 * pcbdata.font_data[' '].w * text.width;
+        lineWidth += fourSpaces - lineWidth % fourSpaces;
+      } else {
+        if (txt[i][j] == '~') {
+          j++;
+          if (j == txt[i].length)
+            break;
+        }
+        lineWidth += pcbdata.font_data[txt[i][j]].w * text.width;
+      }
+    }
+    var offsetx = -lineWidth * (text.justify[0] + 1) / 2;
+    var inOverbar = false;
+    for (var j = 0; j < txt[i].length; j++) {
+      if (txt[i][j] == '\t') {
+        var fourSpaces = 4 * pcbdata.font_data[' '].w * text.width;
+        offsetx += fourSpaces - offsetx % fourSpaces;
+        continue;
+      } else if (txt[i][j] == '~') {
+        j++;
+        if (j == txt[i].length)
+          break;
+        if (txt[i][j] != '~') {
+          inOverbar = !inOverbar;
+        }
+      }
+      var glyph = pcbdata.font_data[txt[i][j]];
+      if (inOverbar) {
+        var overbarStart = [offsetx, -text.height * 1.4 + offsety];
+        var overbarEnd = [offsetx + text.width * glyph.w, overbarStart[1]];
+
+        if (!lastHadOverbar) {
+          overbarStart[0] += text.height * 1.4 * tilt;
+          lastHadOverbar = true;
+        }
+        ctx.beginPath();
+        ctx.moveTo(...overbarStart);
+        ctx.lineTo(...overbarEnd);
+        ctx.stroke();
+      } else {
+        lastHadOverbar = false;
+      }
+      for (var line of glyph.l) {
+        ctx.beginPath();
+        ctx.moveTo(...calcFontPoint(line[0], text, offsetx, offsety, tilt));
+        for (var k = 1; k < line.length; k++) {
+          ctx.lineTo(...calcFontPoint(line[k], text, offsetx, offsety, tilt));
+        }
+        ctx.stroke();
+      }
+      offsetx += glyph.w * text.width;
+    }
+    offsety += interline;
+  }
+  ctx.restore();
+}
+
+function drawedge(ctx, scalefactor, edge, color) {
+  ctx.strokeStyle = color;
+  ctx.lineWidth = Math.max(1 / scalefactor, edge.width);
+  ctx.lineCap = "round";
+  if ("svgpath" in edge) {
+    ctx.stroke(new Path2D(edge.svgpath));
+  } else {
+    ctx.beginPath();
+    if (edge.type == "segment") {
+      ctx.moveTo(...edge.start);
+      ctx.lineTo(...edge.end);
+    }
+    if (edge.type == "rect") {
+      ctx.moveTo(...edge.start);
+      ctx.lineTo(edge.start[0], edge.end[1]);
+      ctx.lineTo(...edge.end);
+      ctx.lineTo(edge.end[0], edge.start[1]);
+      ctx.lineTo(...edge.start);
+    }
+    if (edge.type == "arc") {
+      ctx.arc(
+        ...edge.start,
+        edge.radius,
+        deg2rad(edge.startangle),
+        deg2rad(edge.endangle));
+    }
+    if (edge.type == "circle") {
+      ctx.arc(
+        ...edge.start,
+        edge.radius,
+        0, 2 * Math.PI);
+      ctx.closePath();
+    }
+    if (edge.type == "curve") {
+      ctx.moveTo(...edge.start);
+      ctx.bezierCurveTo(...edge.cpa, ...edge.cpb, ...edge.end);
+    }
+    ctx.stroke();
+  }
+}
+
+function getChamferedRectPath(size, radius, chamfpos, chamfratio) {
+  // chamfpos is a bitmask, left = 1, right = 2, bottom left = 4, bottom right = 8
+  var path = new Path2D();
+  var width = size[0];
+  var height = size[1];
+  var x = width * -0.5;
+  var y = height * -0.5;
+  var chamfOffset = Math.min(width, height) * chamfratio;
+  path.moveTo(x, 0);
+  if (chamfpos & 4) {
+    path.lineTo(x, y + height - chamfOffset);
+    path.lineTo(x + chamfOffset, y + height);
+    path.lineTo(0, y + height);
+  } else {
+    path.arcTo(x, y + height, x + width, y + height, radius);
+  }
+  if (chamfpos & 8) {
+    path.lineTo(x + width - chamfOffset, y + height);
+    path.lineTo(x + width, y + height - chamfOffset);
+    path.lineTo(x + width, 0);
+  } else {
+    path.arcTo(x + width, y + height, x + width, y, radius);
+  }
+  if (chamfpos & 2) {
+    path.lineTo(x + width, y + chamfOffset);
+    path.lineTo(x + width - chamfOffset, y);
+    path.lineTo(0, y);
+  } else {
+    path.arcTo(x + width, y, x, y, radius);
+  }
+  if (chamfpos & 1) {
+    path.lineTo(x + chamfOffset, y);
+    path.lineTo(x, y + chamfOffset);
+    path.lineTo(x, 0);
+  } else {
+    path.arcTo(x, y, x, y + height, radius);
+  }
+  path.closePath();
+  return path;
+}
+
+function getOblongPath(size) {
+  return getChamferedRectPath(size, Math.min(size[0], size[1]) / 2, 0, 0);
+}
+
+function getPolygonsPath(shape) {
+  if (shape.path2d) {
+    return shape.path2d;
+  }
+  if ("svgpath" in shape) {
+    shape.path2d = new Path2D(shape.svgpath);
+  } else {
+    var path = new Path2D();
+    for (var polygon of shape.polygons) {
+      path.moveTo(...polygon[0]);
+      for (var i = 1; i < polygon.length; i++) {
+        path.lineTo(...polygon[i]);
+      }
+      path.closePath();
+    }
+    shape.path2d = path;
+  }
+  return shape.path2d;
+}
+
+function drawPolygonShape(ctx, shape, color) {
+  ctx.save();
+  ctx.fillStyle = color;
+  if (!("svgpath" in shape)) {
+    ctx.translate(...shape.pos);
+    ctx.rotate(deg2rad(-shape.angle));
+  }
+  ctx.fill(getPolygonsPath(shape));
+  ctx.restore();
+}
+
+
+function drawPolylineShape(ctx, shape, color) {
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = shape.width;
+  if (!("svgpath" in shape)) {
+    ctx.translate(...shape.pos);
+    ctx.rotate(deg2rad(-shape.angle));
+  }
+  ctx.stroke(getPolygonsPath(shape));
+  ctx.restore();
+}
+
+function drawDrawing(ctx, scalefactor, drawing, color) {  
+  if (["segment", "arc", "circle", "curve"].includes(drawing.type)) {
+    drawedge(ctx, scalefactor, drawing, color);
+  } else if (drawing.type == "polygon") {
+    drawPolygonShape(ctx, drawing, color);
+  } else if (drawing.type == "text") {    
+    drawText(ctx, drawing, color);
+  } else if (drawing.type == "polyline") {    
+    drawPolylineShape(ctx, drawing, color);
+  }
+}
+
+function getCirclePath(radius) {
+  var path = new Path2D();
+  path.arc(0, 0, radius, 0, 2 * Math.PI);
+  path.closePath();
+  return path;
+}
+
+function getCachedPadPath(pad) {
+  if (!pad.path2d) {
+    // if path2d is not set, build one and cache it on pad object
+    if (pad.shape == "rect") {
+      pad.path2d = new Path2D();
+      pad.path2d.rect(...pad.size.map(c => -c * 0.5), ...pad.size);
+    } else if (pad.shape == "oval") {
+      pad.path2d = getOblongPath(pad.size);
+    } else if (pad.shape == "circle") {
+      pad.path2d = getCirclePath(pad.size[0] / 2);
+    } else if (pad.shape == "roundrect") {
+      pad.path2d = getChamferedRectPath(pad.size, pad.radius, 0, 0);
+    } else if (pad.shape == "chamfrect") {
+      pad.path2d = getChamferedRectPath(pad.size, pad.radius, pad.chamfpos, pad.chamfratio)
+    } else if (pad.shape == "custom") {
+      pad.path2d = getPolygonsPath(pad);
+    } else if(pad.shape === "polygon") {      
+      pad.path2d = new Path2D();
+      if(pad.polygon.length > 1) {
+        const pos = {
+          x: pad.pos[0],
+          y: pad.pos[1]
+        };
+
+        pad.path2d.moveTo(pad.polygon[0].x - pos.x, pad.polygon[0].y - pos.y);
+        for (var i = 1; i < pad.polygon.length; i++) {
+          const point = pad.polygon[i];          
+          pad.path2d.lineTo(point.x - pos.x, point.y - pos.y);
+        }
+        pad.path2d.closePath();              
+      }
+    }
+  }
+  return pad.path2d;
+}
+
+function drawPad(ctx, pad, color, outline) {
+  ctx.save();
+  ctx.translate(...pad.pos);
+  if(pad.shape !== 'polygon') {
+    ctx.rotate(deg2rad(pad.angle));  
+  } else {
+    ctx.rotate(deg2rad(0));  
+  }
+  
+  if (pad.offset) {
+    ctx.translate(...pad.offset);
+  }
+  ctx.fillStyle = color;
+  ctx.strokeStyle = color;
+  var path = getCachedPadPath(pad);
+  if (outline) {
+    ctx.stroke(path);
+  } else {
+    ctx.fill(path);
+  }
+  ctx.restore();
+}
+
+function drawPadHole(ctx, pad, padHoleColor) {
+  if (pad.type != "th") {
+    return
+  };
+
+  ctx.save();
+  ctx.translate(pad.holeCenterPoint.x, pad.holeCenterPoint.y);    
+  ctx.rotate(deg2rad(pad.angle));
+  ctx.fillStyle = padHoleColor;
+  if (pad.drillshape == "oblong") {
+    ctx.fill(getOblongPath(pad.drillsize));
+  } else {
+    ctx.fill(getCirclePath(pad.drillsize[0] / 2));
+  }
+  ctx.restore();
+}
+
+function drawFootprint(ctx, layer, scalefactor, footprint, padColor, padHoleColor, outlineColor, highlight, outline) {
+  if (highlight) {
+    // draw bounding box
+    if (footprint.layer == layer) {
+      ctx.save();
+      ctx.globalAlpha = 0.2;
+      ctx.translate(...footprint.bbox.pos);
+      ctx.rotate(deg2rad(-footprint.bbox.angle));
+      ctx.translate(...footprint.bbox.relpos);
+      ctx.fillStyle = padColor;
+      ctx.fillRect(0, 0, ...footprint.bbox.size);
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = padColor;
+      ctx.strokeRect(0, 0, ...footprint.bbox.size);
+      ctx.restore();
+    }
+  }
+  // draw drawings
+  for (var drawing of footprint.drawings) {
+    if (drawing.layer == layer) {
+      drawDrawing(ctx, scalefactor, drawing.drawing, padColor);
+    }
+  }
+  // draw pads
+  if (settings.renderPads) {
+    for (var pad of footprint.pads) {
+      if (pad.layers.includes(layer)) {
+        drawPad(ctx, pad, padColor, outline);
+        if (pad.pin1 && settings.highlightpin1) {
+          drawPad(ctx, pad, outlineColor, true);
+        }
+      }
+    }
+    for (var pad of footprint.pads) {
+      drawPadHole(ctx, pad, padHoleColor);
+    }
+  }
+}
+
+function drawCrosshair(canvas, x, y, scalefactor, color) {
+  if(!settings.showCrosshair) {
+    return;
+  }
+
+  var ctx = canvas.getContext("2d");
+
+  HTMLFormControlsCollection.log
+  
+  ctx.save();
+  ctx.globalAlpha = 0.75;
+  ctx.lineWidth = 2 / scalefactor;
+  ctx.strokeStyle = color;
+
+  // TODO: Should calculate a proper bbox for the view port.
+  const dummyOffset = 4000;
+
+  // horz line
+  ctx.beginPath();
+  ctx.moveTo(x - dummyOffset, y);
+  ctx.lineTo(x + dummyOffset, y);
+  ctx.stroke();
+
+  // vert line
+  ctx.beginPath();
+  ctx.moveTo(x, y - dummyOffset);
+  ctx.lineTo(x, y + dummyOffset);
+  ctx.stroke();
+
+  ctx.globalAlpha = 1;
+  ctx.restore();
+}
+
+function drawEdgeCuts(canvas, scalefactor) {
+  var ctx = canvas.getContext("2d");
+  var edgecolor = getComputedStyle(topmostdiv).getPropertyValue('--pcb-edge-color');
+  for (var edge of pcbdata.edges) {
+    drawedge(ctx, scalefactor, edge, edgecolor);
+  }
+}
+
+function drawOrphanPads(canvas, layer, scalefactor, highlight, highlightedPads) {
+  if (!settings.renderPads) {
+    return;
+  }
+
+  highlightedPads = highlightedPads || [];
+
+  var ctx = canvas.getContext("2d");
+  ctx.save();
+  ctx.lineWidth = 3 / scalefactor;
+  var style = getComputedStyle(topmostdiv);
+  var padColor = style.getPropertyValue('--pad-color');
+  var padHoleColor = style.getPropertyValue('--pad-hole-color');  
+  if (highlight) {
+    padColor = style.getPropertyValue('--pad-color-highlight');
+    outlineColor = style.getPropertyValue('--pin1-outline-color-highlight');
+  }
+
+  var i = 0;
+  for (var pad of pcbdata.pads) {
+    if (pad.layers.includes(layer)) {
+      var outline = settings.renderDnpOutline;
+      if (!highlight || highlightedPads.includes(i)) {
+        drawPad(ctx, pad, padColor, outline); 
+      }     
+    }
+
+    i++;
+  }
+  
+  for (var pad of pcbdata.pads) {
+    drawPadHole(ctx, pad, padHoleColor);
+  }  
+
+  ctx.restore();
+}
+
+function drawFootprints(canvas, layer, scalefactor, highlight) {
+  var ctx = canvas.getContext("2d");
+  ctx.save();
+  ctx.lineWidth = 3 / scalefactor;
+  var style = getComputedStyle(topmostdiv);
+  var padColor = style.getPropertyValue('--pad-color');
+  var padHoleColor = style.getPropertyValue('--pad-hole-color');
+  var outlineColor = style.getPropertyValue('--pin1-outline-color');
+  if (highlight) {
+    padColor = style.getPropertyValue('--pad-color-highlight');
+    outlineColor = style.getPropertyValue('--pin1-outline-color-highlight');
+  }
+  for (var i = 0; i < pcbdata.footprints.length; i++) {
+    var mod = pcbdata.footprints[i];
+    var outline = settings.renderDnpOutline && pcbdata.bom.skipped.includes(i);
+    if (!highlight || highlightedFootprints.includes(i)) {
+      drawFootprint(ctx, layer, scalefactor, mod, padColor, padHoleColor, outlineColor, highlight, outline);
+    }
+  }
+  ctx.restore();
+}
+
+function drawBgLayer(layername, canvas, layer, scalefactor, edgeColor, polygonColor, textColor) {
+  var ctx = canvas.getContext("2d");
+  for (var d of pcbdata.drawings[layername][layer]) {
+    if (["segment", "arc", "circle", "curve", "rect","polyline"].includes(d.type)) {
+      drawedge(ctx, scalefactor, d, edgeColor);
+    } else if (d.type == "polygon") {
+      drawPolygonShape(ctx, d, polygonColor);
+    } else if (d.type == "text") {
+      drawText(ctx, d, polygonColor);
+    }
+  }
+}
+
+function drawTracks(canvas, layer, color, highlight) {
+  ctx = canvas.getContext("2d");
+  ctx.strokeStyle = color;
+  ctx.lineCap = "round";
+  for(var track of pcbdata.tracks[layer]) {
+    if (highlight && highlightedNet != track.net) continue;
+    ctx.lineWidth = track.width;
+
+    if(track.type === 'polyline') {
+      drawPolylineShape(ctx,track,color);
+    } else if(track.type === 'polygon') {
+      drawPolygonShape(ctx, track, color);
+    } else if(track.type === 'text') {
+      drawText(ctx, track, color);
+    } else {
+      if ('radius' in track) {
+        ctx.beginPath();
+        ctx.arc(
+            ...track.center,
+            track.radius,
+            deg2rad(track.startangle),
+            deg2rad(track.endangle));
+        ctx.stroke();
+      } else if('start' in track && 'end' in track) {
+        ctx.beginPath();
+        ctx.moveTo(...track.start);
+        ctx.lineTo(...track.end);
+        ctx.stroke();
+      }
+      
+    }
+
+  }
+}
+
+function drawZones(canvas, layer, color, highlight) {
+  ctx = canvas.getContext("2d");
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineJoin = "round";
+  for(var zone of pcbdata.zones[layer]) {
+    if (!zone.path2d) {
+      zone.path2d = getPolygonsPath(zone);
+    }
+    if (highlight && highlightedNet != zone.net) continue;
+    ctx.fill(zone.path2d);
+    if (zone.width > 0) {
+      ctx.lineWidth = zone.width;
+      ctx.stroke(zone.path2d);
+    }
+  }
+  ctx.restore();
+}
+
+function clearCanvas(canvas, color = null) {
+  var ctx = canvas.getContext("2d");
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  if (color) {
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  } else {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  ctx.restore();
+}
+
+function drawNets(canvas, layer, highlight) {
+  var style = getComputedStyle(topmostdiv);
+  if (settings.renderTracks) {
+    var trackColor = style.getPropertyValue(highlight ? '--track-color-highlight' : '--track-color');
+    drawTracks(canvas, layer, trackColor, highlight);
+  }
+  if (settings.renderZones) {
+    var zoneColor = style.getPropertyValue(highlight ? '--zone-color-highlight' : '--zone-color');
+    drawZones(canvas, layer, zoneColor, highlight);
+  }
+  if (highlight && settings.renderPads) {
+    var padColor = style.getPropertyValue('--pad-color-highlight');
+    var padHoleColor = style.getPropertyValue('--pad-hole-color');
+    var ctx = canvas.getContext("2d");
+    for (var footprint of pcbdata.footprints) {
+      // draw pads
+      var padDrawn = false;
+      for (var pad of footprint.pads) {
+        if (highlightedNet != pad.net) continue;
+        if (pad.layers.includes(layer)) {
+          drawPad(ctx, pad, padColor, false);
+          padDrawn = true;
+        }
+      }
+      if (padDrawn) {
+        // redraw all pad holes because some pads may overlap
+        for (var pad of footprint.pads) {
+          drawPadHole(ctx, pad, padHoleColor);
+        }
+      }
+    }
+  }
+}
+
+function drawHighlightsOnLayer(canvasdict, clear = true) {
+  if (clear) {
+    clearCanvas(canvasdict.highlight);
+  }
+  
+  if (highlightedFootprints.length > 0) {
+    drawFootprints(canvasdict.highlight, canvasdict.layer,
+      canvasdict.transform.s * canvasdict.transform.zoom, true);
+  }
+
+  // Draw crosshairs
+  if (highlightedFootprints.length > 0) {
+    for(var i = 0; i < pcbdata.footprints.length; i++) {
+      const footprint = pcbdata.footprints[i];
+      if(highlightedFootprints.includes(i) && footprint.layer === canvasdict.layer) {
+        drawCrosshair(canvasdict.highlight, footprint.center[0], footprint.center[1], canvasdict.transform.s * canvasdict.transform.zoom, 'red');
+      }
+    }
+  }
+
+  if (highlightedNet !== null) {
+    var highlightedPads = [];
+    for(var i = 0; i < pcbdata.pads.length; i++) {
+      var pad = pcbdata.pads[i];
+      if(pad.net === highlightedNet) {
+        highlightedPads.push(i);
+      }
+    }
+    
+    drawOrphanPads(canvasdict.highlight, canvasdict.layer,
+      canvasdict.transform.s * canvasdict.transform.zoom, true, highlightedPads);
+
+    drawNets(canvasdict.highlight, canvasdict.layer, true);
+  }
+}
+
+function drawHighlights() {
+  drawHighlightsOnLayer(allcanvas.front);
+  drawHighlightsOnLayer(allcanvas.back);
+}
+
+function drawBackground(canvasdict, clear = true) {
+  if (clear) {
+    clearCanvas(canvasdict.bg);
+    clearCanvas(canvasdict.fab);
+    clearCanvas(canvasdict.silk);
+  }
+
+  drawNets(canvasdict.bg, canvasdict.layer, false);
+
+  drawOrphanPads(canvasdict.bg, canvasdict.layer, canvasdict.transform.s * canvasdict.transform.zoom, false);
+
+  drawFootprints(canvasdict.bg, canvasdict.layer, canvasdict.transform.s * canvasdict.transform.zoom, false);
+
+  drawEdgeCuts(canvasdict.bg, canvasdict.transform.s);
+
+  var style = getComputedStyle(topmostdiv);
+  var edgeColor = style.getPropertyValue('--silkscreen-edge-color');
+  var polygonColor = style.getPropertyValue('--silkscreen-polygon-color');
+  var textColor = style.getPropertyValue('--silkscreen-text-color');
+  if (settings.renderSilkscreen) {
+    drawBgLayer(
+      "silkscreen", canvasdict.silk, canvasdict.layer,
+      canvasdict.transform.s * canvasdict.transform.zoom,
+      edgeColor, polygonColor, textColor);
+  }
+  edgeColor = style.getPropertyValue('--fabrication-edge-color');
+  polygonColor = style.getPropertyValue('--fabrication-polygon-color');
+  textColor = style.getPropertyValue('--fabrication-text-color');
+  if (settings.renderFabrication) {
+    drawBgLayer(
+      "fabrication", canvasdict.fab, canvasdict.layer,
+      canvasdict.transform.s * canvasdict.transform.zoom,
+      edgeColor, polygonColor, textColor);
+  }
+}
+
+function prepareCanvas(canvas, flip, transform) {
+  var ctx = canvas.getContext("2d");
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  var fontsize = 1.55;
+  ctx.scale(transform.zoom, transform.zoom);
+  ctx.translate(transform.panx, transform.pany);
+  if (flip) {
+    ctx.scale(-1, 1);
+  }
+  ctx.translate(transform.x, transform.y);
+  ctx.rotate(deg2rad(settings.boardRotation));
+  ctx.scale(transform.s, transform.s);
+}
+
+function prepareLayer(canvasdict) {
+  var flip = (canvasdict.layer == "B");
+  for (var c of ["bg", "fab", "silk", "highlight"]) {
+    prepareCanvas(canvasdict[c], flip, canvasdict.transform);
+  }
+}
+
+function rotateVector(v, angle) {
+  angle = deg2rad(angle);
+  return [
+    v[0] * Math.cos(angle) - v[1] * Math.sin(angle),
+    v[0] * Math.sin(angle) + v[1] * Math.cos(angle)
+  ];
+}
+
+function applyRotation(bbox) {
+  var corners = [
+    [bbox.minx, bbox.miny],
+    [bbox.minx, bbox.maxy],
+    [bbox.maxx, bbox.miny],
+    [bbox.maxx, bbox.maxy],
+  ];
+  corners = corners.map((v) => rotateVector(v, settings.boardRotation));
+  return {
+    minx: corners.reduce((a, v) => Math.min(a, v[0]), Infinity),
+    miny: corners.reduce((a, v) => Math.min(a, v[1]), Infinity),
+    maxx: corners.reduce((a, v) => Math.max(a, v[0]), -Infinity),
+    maxy: corners.reduce((a, v) => Math.max(a, v[1]), -Infinity),
+  }
+}
+
+function recalcLayerScale(layerdict, width, height) {
+  var bbox = applyRotation(pcbdata.edges_bbox);
+  var scalefactor = 0.98 * Math.min(
+    width / (bbox.maxx - bbox.minx),
+    height / (bbox.maxy - bbox.miny)
+  );
+  if (scalefactor < 0.1) {
+    scalefactor = 1;
+  }
+  layerdict.transform.s = scalefactor;
+  var flip = (layerdict.layer == "B");
+  if (flip) {
+    layerdict.transform.x = -((bbox.maxx + bbox.minx) * scalefactor + width) * 0.5;
+  } else {
+    layerdict.transform.x = -((bbox.maxx + bbox.minx) * scalefactor - width) * 0.5;
+  }
+  layerdict.transform.y = -((bbox.maxy + bbox.miny) * scalefactor - height) * 0.5;
+  for (var c of ["bg", "fab", "silk", "highlight"]) {
+    canvas = layerdict[c];
+    canvas.width = width;
+    canvas.height = height;
+    canvas.style.width = (width / devicePixelRatio) + "px";
+    canvas.style.height = (height / devicePixelRatio) + "px";
+  }
+}
+
+function redrawCanvas(layerdict) {
+  prepareLayer(layerdict);
+  drawBackground(layerdict);
+  drawHighlightsOnLayer(layerdict);
+}
+
+function resizeCanvas(layerdict) {
+  var canvasdivid = {
+    "F": "frontcanvas",
+    "B": "backcanvas"
+  } [layerdict.layer];
+  var width = document.getElementById(canvasdivid).clientWidth * devicePixelRatio;
+  var height = document.getElementById(canvasdivid).clientHeight * devicePixelRatio;
+  recalcLayerScale(layerdict, width, height);
+  redrawCanvas(layerdict);
+}
+
+function resizeAll() {
+  resizeCanvas(allcanvas.front);
+  resizeCanvas(allcanvas.back);
+}
+
+function pointWithinDistanceToSegment(x, y, x1, y1, x2, y2, d) {
+  var A = x - x1;
+  var B = y - y1;
+  var C = x2 - x1;
+  var D = y2 - y1;
+
+  var dot = A * C + B * D;
+  var len_sq = C * C + D * D;
+  var dx, dy;
+  if (len_sq == 0) {
+    // start and end of the segment coincide
+    dx = x - x1;
+    dy = y - y1;
+  } else {
+    var param = dot / len_sq;
+    var xx, yy;
+    if (param < 0) {
+      xx = x1;
+      yy = y1;
+    } else if (param > 1) {
+      xx = x2;
+      yy = y2;
+    } else {
+      xx = x1 + param * C;
+      yy = y1 + param * D;
+    }
+    dx = x - xx;
+    dy = y - yy;
+  }
+  return dx * dx + dy * dy <= d * d;
+}
+
+function modulo(n, mod) {
+  return ((n % mod) + mod ) % mod;
+}
+
+function pointWithinDistanceToArc(x, y, xc, yc, radius, startangle, endangle, d) {
+  var dx = x - xc;
+  var dy = y - yc;
+  var r_sq = dx * dx + dy * dy;
+  var rmin = Math.max(0, radius-d);
+  var rmax = radius + d;
+
+  if (r_sq < rmin * rmin || r_sq > rmax * rmax)
+    return false;
+
+  var angle1 = modulo(deg2rad(startangle), 2 * Math.PI);
+  var dx1 = xc + radius * Math.cos(angle1) - x;
+  var dy1 = yc + radius * Math.sin(angle1) - y;
+  if (dx1 * dx1 + dy1 * dy1 <= d * d)
+    return true;
+
+  var angle2 = modulo(deg2rad(endangle), 2 * Math.PI);
+  var dx2 = xc + radius * Math.cos(angle2) - x;
+  var dy2 = yc + radius * Math.sin(angle2) - y;
+  if (dx2 * dx2 + dy2 * dy2 <= d * d)
+    return true;
+
+  var angle = modulo(Math.atan2(dy, dx), 2 * Math.PI);
+  if (angle1 > angle2)
+    return (angle >= angle2 || angle <= angle1);
+  else
+    return (angle >= angle1 && angle <= angle2);
+}
+
+function pointWithinPad(x, y, pad) {
+  var v = [x - pad.pos[0], y - pad.pos[1]];
+  v = rotateVector(v, -pad.angle);
+  if (pad.offset) {
+    v[0] -= pad.offset[0];
+    v[1] -= pad.offset[1];
+  }
+  return emptyContext2d.isPointInPath(getCachedPadPath(pad), ...v);
+}
+
+function netHitScan(layer, x, y) {
+  // TODO: Should be refactored
+
+  // Check track segments
+  if (settings.renderTracks && pcbdata.tracks) {
+    for(var track of pcbdata.tracks[layer]) {
+      if(track.type === 'polyline') {
+        const path = getPolygonsPath(track);
+        if(path) {
+          hitTestContext2d.save();
+          hitTestContext2d.lineWidth = track.width;
+          
+          if(hitTestContext2d.isPointInStroke(path,x,y)) {
+            hitTestContext2d.restore();
+            return track.net;            
+          }
+          
+          hitTestContext2d.restore();          
+        }        
+
+      } else if(track.type === 'polygon') {
+        const path = getPolygonsPath(track);
+        if(path && hitTestContext2d.isPointInPath(path,x,y)) {          
+          return track.net;                      
+        }                     
+      } else if(track.type === 'text') {
+        // TODO: To implement taking in account TrueType fonts.
+      } else if ('radius' in track) {
+        if (pointWithinDistanceToArc(x, y, ...track.center, track.radius, track.startangle, track.endangle, track.width / 2)) {
+          return track.net;
+        }
+      } else if('start' in track && 'end' in track) {
+        if (pointWithinDistanceToSegment(x, y, ...track.start, ...track.end, track.width / 2)) {
+          return track.net;
+        }
+      }
+    }
+  }
+  // Check pads
+  if (settings.renderPads) {
+
+    // Footprints containing pads
+    for (var footprint of pcbdata.footprints) {
+      for(var pad of footprint.pads) {
+        if (pad.layers.includes(layer) && pointWithinPad(x, y, pad)) {
+          return pad.net;
+        }
+      }
+    }
+
+    // Orphan pads
+    for(var pad of pcbdata.pads) {
+      if (pad.layers.includes(layer) && pointWithinPad(x, y, pad)) {
+        return pad.net;
+      }
+    }
+  }
+  return null;
+}
+
+function pointWithinFootprintBbox(x, y, bbox) {
+  var v = [x - bbox.pos[0], y - bbox.pos[1]];
+  v = rotateVector(v, bbox.angle);
+  return bbox.relpos[0] <= v[0] && v[0] <= bbox.relpos[0] + bbox.size[0] &&
+         bbox.relpos[1] <= v[1] && v[1] <= bbox.relpos[1] + bbox.size[1];
+}
+
+function bboxHitScan(layer, x, y) {
+  var result = [];
+  for (var i = 0; i < pcbdata.footprints.length; i++) {
+    var footprint = pcbdata.footprints[i];
+    if (footprint.layer == layer) {
+      if (pointWithinFootprintBbox(x, y, footprint.bbox)) {
+        result.push(i);
+      }
+    }
+  }
+  return result;
+}
+
+function handlePointerDown(e, layerdict) {
+  if (e.button != 0 && e.button != 1) {
+    return;
+  }
+  e.preventDefault();
+  e.stopPropagation();
+
+  if (!e.hasOwnProperty("offsetX")) {
+    // The polyfill doesn't set this properly
+    e.offsetX = e.pageX - e.currentTarget.offsetLeft;
+    e.offsetY = e.pageY - e.currentTarget.offsetTop;
+  }
+
+  layerdict.pointerStates[e.pointerId] = {
+    distanceTravelled: 0,
+    lastX: e.offsetX,
+    lastY: e.offsetY,
+    downTime: Date.now(),
+  };
+}
+
+function handleMouseClick(e, layerdict) {
+  if (!e.hasOwnProperty("offsetX")) {
+    // The polyfill doesn't set this properly
+    e.offsetX = e.pageX - e.currentTarget.offsetLeft;
+    e.offsetY = e.pageY - e.currentTarget.offsetTop;
+  }
+
+  var x = e.offsetX;
+  var y = e.offsetY;
+  var t = layerdict.transform;
+  if (layerdict.layer == "B") {
+    x = (devicePixelRatio * x / t.zoom - t.panx + t.x) / -t.s;
+  } else {
+    x = (devicePixelRatio * x / t.zoom - t.panx - t.x) / t.s;
+  }
+  y = (devicePixelRatio * y / t.zoom - t.y - t.pany) / t.s;
+  var v = rotateVector([x, y], -settings.boardRotation);
+  if ("nets" in pcbdata) {
+    var net = netHitScan(layerdict.layer, ...v);
+    if (net !== highlightedNet) {
+      netClicked(net);
+    }
+  }
+  if (highlightedNet === null) {
+    var footprints = bboxHitScan(layerdict.layer, ...v);
+    if (footprints.length > 0) {
+      footprintsClicked(footprints);
+    }
+  }
+}
+
+function handlePointerLeave(e, layerdict) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  if (!settings.redrawOnDrag) {
+    redrawCanvas(layerdict);
+  }
+
+  delete layerdict.pointerStates[e.pointerId];
+}
+
+function resetTransform(layerdict) {
+  layerdict.transform.panx = 0;
+  layerdict.transform.pany = 0;
+  layerdict.transform.zoom = 1;
+  redrawCanvas(layerdict);
+}
+
+function handlePointerUp(e, layerdict) {
+  if (!e.hasOwnProperty("offsetX")) {
+    // The polyfill doesn't set this properly
+    e.offsetX = e.pageX - e.currentTarget.offsetLeft;
+    e.offsetY = e.pageY - e.currentTarget.offsetTop;
+  }
+
+  e.preventDefault();
+  e.stopPropagation();
+
+  if (e.button == 2) {
+    // Reset pan and zoom on right click.
+    resetTransform(layerdict);
+    layerdict.anotherPointerTapped = false;
+    return;
+  }
+
+  // We haven't necessarily had a pointermove event since the interaction started, so make sure we update this now
+  var ptr = layerdict.pointerStates[e.pointerId];
+  ptr.distanceTravelled += Math.abs(e.offsetX - ptr.lastX) + Math.abs(e.offsetY - ptr.lastY);
+
+  if (e.button == 0 && ptr.distanceTravelled < 10 && Date.now() - ptr.downTime <= 500) {
+    if (Object.keys(layerdict.pointerStates).length == 1) {
+      if (layerdict.anotherPointerTapped) {
+        // This is the second pointer coming off of a two-finger tap
+        resetTransform(layerdict);
+      } else {
+        // This is just a regular tap
+        handleMouseClick(e, layerdict);
+      }
+      layerdict.anotherPointerTapped = false;
+    } else {
+      // This is the first finger coming off of what could become a two-finger tap
+      layerdict.anotherPointerTapped = true;
+    }
+  } else {
+    if (!settings.redrawOnDrag) {
+      redrawCanvas(layerdict);
+    }
+    layerdict.anotherPointerTapped = false;
+  }
+
+  delete layerdict.pointerStates[e.pointerId];
+}
+
+function handlePointerMove(e, layerdict) {
+  if (!layerdict.pointerStates.hasOwnProperty(e.pointerId)) {
+    return;
+  }
+  e.preventDefault();
+  e.stopPropagation();
+
+  if (!e.hasOwnProperty("offsetX")) {
+    // The polyfill doesn't set this properly
+    e.offsetX = e.pageX - e.currentTarget.offsetLeft;
+    e.offsetY = e.pageY - e.currentTarget.offsetTop;
+  }
+
+  var thisPtr = layerdict.pointerStates[e.pointerId];
+
+  var dx = e.offsetX - thisPtr.lastX;
+  var dy = e.offsetY - thisPtr.lastY;
+
+  // If this number is low on pointer up, we count the action as a click
+  thisPtr.distanceTravelled += Math.abs(dx) + Math.abs(dy);
+
+  if (Object.keys(layerdict.pointerStates).length == 1) {
+    // This is a simple drag
+    layerdict.transform.panx += devicePixelRatio * dx / layerdict.transform.zoom;
+    layerdict.transform.pany += devicePixelRatio * dy / layerdict.transform.zoom;
+  } else if (Object.keys(layerdict.pointerStates).length == 2) {
+    var otherPtr = Object.values(layerdict.pointerStates).filter((ptr) => ptr != thisPtr)[0];
+
+    var oldDist = Math.sqrt(Math.pow(thisPtr.lastX - otherPtr.lastX, 2) + Math.pow(thisPtr.lastY - otherPtr.lastY, 2));
+    var newDist = Math.sqrt(Math.pow(e.offsetX - otherPtr.lastX, 2)     + Math.pow(e.offsetY - otherPtr.lastY, 2));
+
+    var scaleFactor = newDist/oldDist;
+
+    if (scaleFactor != NaN) {
+      layerdict.transform.zoom *= scaleFactor;
+
+      var zoomd = (1 - scaleFactor) / layerdict.transform.zoom;
+      layerdict.transform.panx += devicePixelRatio * otherPtr.lastX * zoomd;
+      layerdict.transform.pany += devicePixelRatio * otherPtr.lastY * zoomd;
+    }
+  }
+
+  thisPtr.lastX = e.offsetX;
+  thisPtr.lastY = e.offsetY;
+
+  if (settings.redrawOnDrag) {
+    redrawCanvas(layerdict);
+  }
+}
+
+function handleMouseWheel(e, layerdict) {
+  e.preventDefault();
+  e.stopPropagation();
+  var t = layerdict.transform;
+  var wheeldelta = e.deltaY;
+  if (e.deltaMode == 1) {
+    // FF only, scroll by lines
+    wheeldelta *= 30;
+  } else if (e.deltaMode == 2) {
+    wheeldelta *= 300;
+  }
+  var m = Math.pow(1.1, -wheeldelta / 40);
+  // Limit amount of zoom per tick.
+  if (m > 2) {
+    m = 2;
+  } else if (m < 0.5) {
+    m = 0.5;
+  }
+  t.zoom *= m;
+  var zoomd = (1 - m) / t.zoom;
+  t.panx += devicePixelRatio * e.offsetX * zoomd;
+  t.pany += devicePixelRatio * e.offsetY * zoomd;
+  redrawCanvas(layerdict);
+}
+
+function addMouseHandlers(div, layerdict) {
+  div.addEventListener("pointerdown", function(e) {
+    handlePointerDown(e, layerdict);
+  });
+  div.addEventListener("pointermove", function(e) {
+    handlePointerMove(e, layerdict);
+  });
+  div.addEventListener("pointerup", function(e) {
+    handlePointerUp(e, layerdict);
+  });
+  var pointerleave = function(e) {
+    handlePointerLeave(e, layerdict);
+  }
+  div.addEventListener("pointercancel", pointerleave);
+  div.addEventListener("pointerleave", pointerleave);
+  div.addEventListener("pointerout", pointerleave);
+
+  div.onwheel = function(e) {
+    handleMouseWheel(e, layerdict);
+  }
+  for (var element of [div, layerdict.bg, layerdict.fab, layerdict.silk, layerdict.highlight]) {
+    element.addEventListener("contextmenu", function(e) {
+      e.preventDefault();
+    }, false);
+  }
+}
+
+function setRedrawOnDrag(value) {
+  settings.redrawOnDrag = value;
+  writeStorage("redrawOnDrag", value);
+}
+
+function setShowCrosshair(value) {
+  settings.showCrosshair = value;
+  writeStorage("showCrosshair", value);
+}
+
+function setBoardRotation(value) {
+  settings.boardRotation = value * 5;
+  writeStorage("boardRotation", settings.boardRotation);
+  document.getElementById("rotationDegree").textContent = settings.boardRotation;
+  resizeAll();
+}
+
+function initRender() {
+  allcanvas = {
+    front: {
+      transform: {
+        x: 0,
+        y: 0,
+        s: 1,
+        panx: 0,
+        pany: 0,
+        zoom: 1,
+      },
+      pointerStates: {},
+      anotherPointerTapped: false,
+      bg: document.getElementById("F_bg"),
+      fab: document.getElementById("F_fab"),
+      silk: document.getElementById("F_slk"),
+      highlight: document.getElementById("F_hl"),
+      layer: "F",
+    },
+    back: {
+      transform: {
+        x: 0,
+        y: 0,
+        s: 1,
+        panx: 0,
+        pany: 0,
+        zoom: 1,
+      },
+      pointerStates: {},
+      anotherPointerTapped: false,
+      bg: document.getElementById("B_bg"),
+      fab: document.getElementById("B_fab"),
+      silk: document.getElementById("B_slk"),
+      highlight: document.getElementById("B_hl"),
+      layer: "B",
+    }
+  };
+  addMouseHandlers(document.getElementById("frontcanvas"), allcanvas.front);
+  addMouseHandlers(document.getElementById("backcanvas"), allcanvas.back);
+}
+
+///////////////////////////////////////////////
+
+///////////////////////////////////////////////
+/* DOM manipulation and misc code */
+
+var bomsplit;
+var canvassplit;
+var initDone = false;
+var bomSortFunction = null;
+var currentSortColumn = null;
+var currentSortOrder = null;
+var currentHighlightedRowId;
+var highlightHandlers = [];
+var footprintIndexToHandler = {};
+var netsToHandler = {};
+var highlightedFootprints = [];
+var highlightedOrphanPads = [];
+var highlightedNet = null;
+var lastClicked;
+
+function dbg(html) {
+  dbgdiv.innerHTML = html;
+}
+
+function redrawIfInitDone() {
+  if (initDone) {
+    redrawCanvas(allcanvas.front);
+    redrawCanvas(allcanvas.back);
+  }
+}
+
+function padsVisible(value) {
+  writeStorage("padsVisible", value);
+  settings.renderPads = value;
+  redrawIfInitDone();
+}
+
+function referencesVisible(value) {
+  writeStorage("referencesVisible", value);
+  settings.renderReferences = value;
+  redrawIfInitDone();
+}
+
+function valuesVisible(value) {
+  writeStorage("valuesVisible", value);
+  settings.renderValues = value;
+  redrawIfInitDone();
+}
+
+function tracksVisible(value) {
+  writeStorage("tracksVisible", value);
+  settings.renderTracks = value;
+  redrawIfInitDone();
+}
+
+function zonesVisible(value) {
+  writeStorage("zonesVisible", value);
+  settings.renderZones = value;
+  redrawIfInitDone();
+}
+
+function dnpOutline(value) {
+  writeStorage("dnpOutline", value);
+  settings.renderDnpOutline = value;
+  redrawIfInitDone();
+}
+
+function setDarkMode(value) {
+  if (value) {
+    topmostdiv.classList.add("dark");
+  } else {
+    topmostdiv.classList.remove("dark");
+  }
+  writeStorage("darkmode", value);
+  settings.darkMode = value;
+  redrawIfInitDone();
+}
+
+function setFullscreen(value) {
+  if (value) {
+    document.documentElement.requestFullscreen();
+  } else {
+    document.exitFullscreen();
+  }
+}
+
+function fabricationVisible(value) {
+  writeStorage("fabricationVisible", value);
+  settings.renderFabrication = value;
+  redrawIfInitDone();
+}
+
+function silkscreenVisible(value) {
+  writeStorage("silkscreenVisible", value);
+  settings.renderSilkscreen = value;
+  redrawIfInitDone();
+}
+
+function setHighlightPin1(value) {
+  writeStorage("highlightpin1", value);
+  settings.highlightpin1 = value;
+  redrawIfInitDone();
+}
+
+function getStoredCheckboxRefs(checkbox) {
+  function convert(ref) {
+    var intref = parseInt(ref);
+    if (isNaN(intref)) {
+      for (var i = 0; i < pcbdata.footprints.length; i++) {
+        if (pcbdata.footprints[i].ref == ref) {
+          return i;
+        }
+      }
+      return -1;
+    } else {
+      return intref;
+    }
+  }
+  if (!(checkbox in settings.checkboxStoredRefs)) {
+    var val = readStorage("checkbox_" + checkbox);
+    settings.checkboxStoredRefs[checkbox] = val ? val : "";
+  }
+  if (!settings.checkboxStoredRefs[checkbox]) {
+    return new Set();
+  } else {
+    return new Set(settings.checkboxStoredRefs[checkbox].split(",").map(r => convert(r)).filter(a => a >= 0));
+  }
+}
+
+function getCheckboxState(checkbox, references) {
+  var storedRefsSet = getStoredCheckboxRefs(checkbox);
+  var currentRefsSet = new Set(references.map(r => r[1]));
+  // Get difference of current - stored
+  var difference = new Set(currentRefsSet);
+  for (ref of storedRefsSet) {
+    difference.delete(ref);
+  }
+  if (difference.size == 0) {
+    // All the current refs are stored
+    return "checked";
+  } else if (difference.size == currentRefsSet.size) {
+    // None of the current refs are stored
+    return "unchecked";
+  } else {
+    // Some of the refs are stored
+    return "indeterminate";
+  }
+}
+
+function setBomCheckboxState(checkbox, element, references) {
+  var state = getCheckboxState(checkbox, references);
+  element.checked = (state == "checked");
+  element.indeterminate = (state == "indeterminate");
+}
+
+function createCheckboxChangeHandler(checkbox, references, row) {
+  return function() {
+    refsSet = getStoredCheckboxRefs(checkbox);
+    var darkenWhenChecked = settings.darkenWhenChecked == checkbox;
+    eventArgs = {
+      checkbox: checkbox,
+      refs: references,
+    }
+    if (this.checked) {
+      // checkbox ticked
+      for (var ref of references) {
+        refsSet.add(ref[1]);
+      }
+      if (darkenWhenChecked) {
+        row.classList.add("checked");
+      }
+      eventArgs.state = 'checked';
+    } else {
+      // checkbox unticked
+      for (var ref of references) {
+        refsSet.delete(ref[1]);
+      }
+      if (darkenWhenChecked) {
+        row.classList.remove("checked");
+      }
+      eventArgs.state = 'unchecked';
+    }
+    settings.checkboxStoredRefs[checkbox] = [...refsSet].join(",");
+    writeStorage("checkbox_" + checkbox, settings.checkboxStoredRefs[checkbox]);
+    updateCheckboxStats(checkbox);
+    EventHandler.emitEvent(IBOM_EVENT_TYPES.CHECKBOX_CHANGE_EVENT, eventArgs);
+  }
+}
+
+function clearHighlightedFootprints() {
+  if (currentHighlightedRowId) {
+    document.getElementById(currentHighlightedRowId).classList.remove("highlighted");
+    currentHighlightedRowId = null;
+    highlightedFootprints = [];  
+    highlightedOrphanPads = [];  
+    highlightedNet = null;
+  }
+}
+
+function createRowHighlightHandler(rowid, refs, net) {
+  return function() {
+    if (currentHighlightedRowId) {
+      if (currentHighlightedRowId == rowid) {
+        return;
+      }
+      document.getElementById(currentHighlightedRowId).classList.remove("highlighted");
+    }
+    document.getElementById(rowid).classList.add("highlighted");
+    currentHighlightedRowId = rowid;
+    highlightedFootprints = refs ? refs.map(r => r[1]) : [];
+    highlightedNet = net;
+    drawHighlights();
+    EventHandler.emitEvent(
+      IBOM_EVENT_TYPES.HIGHLIGHT_EVENT,
+      {
+        rowid: rowid,
+        refs: refs,
+        net: net
+      });
+  }
+}
+
+function entryMatches(entry) {
+  if (settings.bommode == "netlist") {
+    // entry is just a net name
+    return entry.toLowerCase().indexOf(filter) >= 0;
+  }
+  // check refs
+  for (var ref of entry[3]) {
+    if (ref[0].toLowerCase().indexOf(filter) >= 0) {
+      return true;
+    }
+  }
+  // check extra fields
+  for (var i in config.extra_fields) {
+    if (entry[4][i].toLowerCase().indexOf(filter) >= 0) {
+      return true;
+    }
+  }
+  // check value
+  if (entry[1].toLowerCase().indexOf(filter) >= 0) {
+    return true;
+  }
+  // check footprint
+  if (entry[2].toLowerCase().indexOf(filter) >= 0) {
+    return true;
+  }
+  return false;
+}
+
+function findRefInEntry(entry) {
+  return entry[3].filter(r => r[0].toLowerCase() == reflookup);
+}
+
+function highlightFilter(s) {
+  if (!filter) {
+    return s;
+  }
+  var parts = s.toLowerCase().split(filter);
+  if (parts.length == 1) {
+    return s;
+  }
+  var r = "";
+  var pos = 0;
+  for (var i in parts) {
+    if (i > 0) {
+      r += '<mark class="highlight">' +
+        s.substring(pos, pos + filter.length) +
+        '</mark>';
+      pos += filter.length;
+    }
+    r += s.substring(pos, pos + parts[i].length);
+    pos += parts[i].length;
+  }
+  return r;
+}
+
+function checkboxSetUnsetAllHandler(checkboxname) {
+  return function() {
+    var checkboxnum = 0;
+    while (checkboxnum < settings.checkboxes.length &&
+      settings.checkboxes[checkboxnum].toLowerCase() != checkboxname.toLowerCase()) {
+      checkboxnum++;
+    }
+    if (checkboxnum >= settings.checkboxes.length) {
+      return;
+    }
+    var allset = true;
+    var checkbox;
+    var row;
+    for (row of bombody.childNodes) {
+      checkbox = row.childNodes[checkboxnum + 1].childNodes[0];
+      if (!checkbox.checked || checkbox.indeterminate) {
+        allset = false;
+        break;
+      }
+    }
+    for (row of bombody.childNodes) {
+      checkbox = row.childNodes[checkboxnum + 1].childNodes[0];
+      checkbox.checked = !allset;
+      checkbox.indeterminate = false;
+      checkbox.onchange();
+    }
+  }
+}
+
+function createColumnHeader(name, cls, comparator) {
+  var th = document.createElement("TH");
+  th.innerHTML = name;
+  th.classList.add(cls);
+  th.style.cursor = "pointer";
+  var span = document.createElement("SPAN");
+  span.classList.add("sortmark");
+  span.classList.add("none");
+  th.appendChild(span);
+  th.onclick = function() {
+    if (currentSortColumn && this !== currentSortColumn) {
+      // Currently sorted by another column
+      currentSortColumn.childNodes[1].classList.remove(currentSortOrder);
+      currentSortColumn.childNodes[1].classList.add("none");
+      currentSortColumn = null;
+      currentSortOrder = null;
+    }
+    if (currentSortColumn && this === currentSortColumn) {
+      // Already sorted by this column
+      if (currentSortOrder == "asc") {
+        // Sort by this column, descending order
+        bomSortFunction = function(a, b) {
+          return -comparator(a, b);
+        }
+        currentSortColumn.childNodes[1].classList.remove("asc");
+        currentSortColumn.childNodes[1].classList.add("desc");
+        currentSortOrder = "desc";
+      } else {
+        // Unsort
+        bomSortFunction = null;
+        currentSortColumn.childNodes[1].classList.remove("desc");
+        currentSortColumn.childNodes[1].classList.add("none");
+        currentSortColumn = null;
+        currentSortOrder = null;
+      }
+    } else {
+      // Sort by this column, ascending order
+      bomSortFunction = comparator;
+      currentSortColumn = this;
+      currentSortColumn.childNodes[1].classList.remove("none");
+      currentSortColumn.childNodes[1].classList.add("asc");
+      currentSortOrder = "asc";
+    }
+    populateBomBody();
+  }
+  return th;
+}
+
+function populateBomHeader() {
+  while (bomhead.firstChild) {
+    bomhead.removeChild(bomhead.firstChild);
+  }
+  var tr = document.createElement("TR");
+  var th = document.createElement("TH");
+  th.classList.add("numCol");
+  tr.appendChild(th);
+  var checkboxCompareClosure = function(checkbox) {
+    return (a, b) => {
+      var stateA = getCheckboxState(checkbox, a[3]);
+      var stateB = getCheckboxState(checkbox, b[3]);
+      if (stateA > stateB) return -1;
+      if (stateA < stateB) return 1;
+      return 0;
+    }
+  }
+  if (settings.bommode == "netlist") {
+    th = createColumnHeader("Net name", "bom-netname", (a, b) => {
+      if (a > b) return -1;
+      if (a < b) return 1;
+      return 0;
+    });
+    tr.appendChild(th);
+  } else {
+    for (var checkbox of settings.checkboxes) {
+      th = createColumnHeader(
+        checkbox, "bom-checkbox", checkboxCompareClosure(checkbox));
+      th.onclick = fancyDblClickHandler(
+        th, th.onclick.bind(th), checkboxSetUnsetAllHandler(checkbox));
+      tr.appendChild(th);
+    }
+    tr.appendChild(createColumnHeader("References", "References", (a, b) => {
+      var i = 0;
+      while (i < a[3].length && i < b[3].length) {
+        if (a[3][i] != b[3][i]) return a[3][i] > b[3][i] ? 1 : -1;
+        i++;
+      }
+      return a[3].length - b[3].length;
+    }));
+    // Extra fields
+    if (config.extra_fields.length > 0) {
+      var extraFieldCompareClosure = function(fieldIndex) {
+        return (a, b) => {
+          var fa = a[4][fieldIndex];
+          var fb = b[4][fieldIndex];
+          if (fa != fb) return fa > fb ? 1 : -1;
+          else return 0;
+        }
+      }
+      for (var i in config.extra_fields) {
+        tr.appendChild(createColumnHeader(
+          config.extra_fields[i], "extra", extraFieldCompareClosure(i)));
+      }
+    }
+    tr.appendChild(createColumnHeader("Value", "Value", (a, b) => {
+      return valueCompare(a[5], b[5], a[1], b[1]);
+    }));
+    tr.appendChild(createColumnHeader("Footprint", "Footprint", (a, b) => {
+      if (a[2] != b[2]) return a[2] > b[2] ? 1 : -1;
+      else return 0;
+    }));
+    if (settings.bommode == "grouped") {
+      tr.appendChild(createColumnHeader("Quantity", "Quantity", (a, b) => {
+        return a[3].length - b[3].length;
+      }));
+    }
+  }
+  bomhead.appendChild(tr);
+}
+
+function populateBomBody() {
+  while (bom.firstChild) {
+    bom.removeChild(bom.firstChild);
+  }
+  highlightHandlers = [];
+  footprintIndexToHandler = {};
+  netsToHandler = {};
+  currentHighlightedRowId = null;
+  var first = true;
+  if (settings.bommode == "netlist") {
+    bomtable = pcbdata.nets.slice();
+  } else {
+    switch (settings.canvaslayout) {
+      case 'F':
+        bomtable = pcbdata.bom.F.slice();
+        break;
+      case 'FB':
+        bomtable = pcbdata.bom.both.slice();
+        break;
+      case 'B':
+        bomtable = pcbdata.bom.B.slice();
+        break;
+    }
+    if (settings.bommode == "ungrouped") {
+      // expand bom table
+      expandedTable = []
+      for (var bomentry of bomtable) {
+        for (var ref of bomentry[3]) {
+          expandedTable.push([1, bomentry[1], bomentry[2], [ref], bomentry[4], bomentry[5]]);
+        }
+      }
+      bomtable = expandedTable;
+    }
+  }
+  if (bomSortFunction) {
+    bomtable = bomtable.sort(bomSortFunction);
+  }
+  for (var i in bomtable) {
+    var bomentry = bomtable[i];
+    if (filter && !entryMatches(bomentry)) {
+      continue;
+    }
+    var references = null;
+    var netname = null;
+    var tr = document.createElement("TR");
+    var td = document.createElement("TD");
+    var rownum = +i + 1;
+    tr.id = "bomrow" + rownum;
+    td.textContent = rownum;
+    tr.appendChild(td);
+    if (settings.bommode == "netlist") {
+      netname = bomentry;
+      td = document.createElement("TD");
+      td.innerHTML = highlightFilter(netname ? netname : "&lt;no net&gt;");
+      tr.appendChild(td);
+    } else {
+      if (reflookup) {
+        references = findRefInEntry(bomentry);
+        if (references.length == 0) {
+          continue;
+        }
+      } else {
+        references = bomentry[3];
+      }
+      // Checkboxes
+      for (var checkbox of settings.checkboxes) {
+        if (checkbox) {
+          td = document.createElement("TD");
+          var input = document.createElement("input");
+          input.type = "checkbox";
+          input.onchange = createCheckboxChangeHandler(checkbox, references, tr);
+          setBomCheckboxState(checkbox, input, references);
+          if (input.checked && settings.darkenWhenChecked == checkbox) {
+            tr.classList.add("checked");
+          }
+          td.appendChild(input);
+          tr.appendChild(td);
+        }
+      }
+      // References
+      td = document.createElement("TD");
+      td.innerHTML = highlightFilter(references.map(r => r[0]).join(", "));
+      tr.appendChild(td);
+      // Extra fields
+      for (var i in config.extra_fields) {
+        td = document.createElement("TD");
+        td.innerHTML = highlightFilter(bomentry[4][i]);
+        tr.appendChild(td);
+      }
+      // Value
+      td = document.createElement("TD");
+      td.innerHTML = highlightFilter(bomentry[1]);
+      tr.appendChild(td);
+      // Footprint
+      td = document.createElement("TD");
+      td.innerHTML = highlightFilter(bomentry[2]);
+      tr.appendChild(td);
+      if (settings.bommode == "grouped") {
+        // Quantity
+        td = document.createElement("TD");
+        td.textContent = bomentry[3].length;
+        tr.appendChild(td);
+      }
+    }
+    bom.appendChild(tr);
+    var handler = createRowHighlightHandler(tr.id, references, netname);
+    tr.onmousemove = handler;
+    highlightHandlers.push({
+      id: tr.id,
+      handler: handler,
+    });
+    if (references !== null) {
+      for (var refIndex of references.map(r => r[1])) {
+        footprintIndexToHandler[refIndex] = handler;
+      }
+    }
+    if (netname !== null) {
+      netsToHandler[netname] = handler;
+    }
+    if ((filter || reflookup) && first) {
+      handler();
+      first = false;
+    }
+  }
+  EventHandler.emitEvent(
+    IBOM_EVENT_TYPES.BOM_BODY_CHANGE_EVENT,
+    {
+      filter: filter,
+      reflookup: reflookup,
+      checkboxes: settings.checkboxes,
+      bommode: settings.bommode,
+    });
+}
+
+function highlightPreviousRow() {
+  if (!currentHighlightedRowId) {
+    highlightHandlers[highlightHandlers.length - 1].handler();
+  } else {
+    if (highlightHandlers.length > 1 &&
+      highlightHandlers[0].id == currentHighlightedRowId) {
+      highlightHandlers[highlightHandlers.length - 1].handler();
+    } else {
+      for (var i = 0; i < highlightHandlers.length - 1; i++) {
+        if (highlightHandlers[i + 1].id == currentHighlightedRowId) {
+          highlightHandlers[i].handler();
+          break;
+        }
+      }
+    }
+  }
+  smoothScrollToRow(currentHighlightedRowId);
+}
+
+function highlightNextRow() {
+  if (!currentHighlightedRowId) {
+    highlightHandlers[0].handler();
+  } else {
+    if (highlightHandlers.length > 1 &&
+      highlightHandlers[highlightHandlers.length - 1].id == currentHighlightedRowId) {
+      highlightHandlers[0].handler();
+    } else {
+      for (var i = 1; i < highlightHandlers.length; i++) {
+        if (highlightHandlers[i - 1].id == currentHighlightedRowId) {
+          highlightHandlers[i].handler();
+          break;
+        }
+      }
+    }
+  }
+  smoothScrollToRow(currentHighlightedRowId);
+}
+
+function populateBomTable() {
+  populateBomHeader();
+  populateBomBody();
+}
+
+function footprintsClicked(footprintIndexes) {
+  var lastClickedIndex = footprintIndexes.indexOf(lastClicked);
+  for (var i = 1; i <= footprintIndexes.length; i++) {
+    var refIndex = footprintIndexes[(lastClickedIndex + i) % footprintIndexes.length];
+    if (refIndex in footprintIndexToHandler) {
+      lastClicked = refIndex;
+      footprintIndexToHandler[refIndex]();
+      smoothScrollToRow(currentHighlightedRowId);
+      break;
+    }
+  }
+}
+
+function netClicked(net) {
+  if (net in netsToHandler) {
+    netsToHandler[net]();
+    smoothScrollToRow(currentHighlightedRowId);
+  } else {
+    clearHighlightedFootprints();
+    highlightedNet = net;
+    drawHighlights();
+  }
+}
+
+function updateFilter(input) {
+  filter = input.toLowerCase();
+  populateBomTable();
+}
+
+function updateRefLookup(input) {
+  reflookup = input.toLowerCase();
+  populateBomTable();
+}
+
+function changeCanvasLayout(layout) {
+  document.getElementById("fl-btn").classList.remove("depressed");
+  document.getElementById("fb-btn").classList.remove("depressed");
+  document.getElementById("bl-btn").classList.remove("depressed");
+  switch (layout) {
+    case 'F':
+      document.getElementById("fl-btn").classList.add("depressed");
+      if (settings.bomlayout != "bom-only") {
+        canvassplit.collapse(1);
+      }
+      break;
+    case 'B':
+      document.getElementById("bl-btn").classList.add("depressed");
+      if (settings.bomlayout != "bom-only") {
+        canvassplit.collapse(0);
+      }
+      break;
+    default:
+      document.getElementById("fb-btn").classList.add("depressed");
+      if (settings.bomlayout != "bom-only") {
+        canvassplit.setSizes([50, 50]);
+      }
+  }
+  settings.canvaslayout = layout;
+  writeStorage("canvaslayout", layout);
+  resizeAll();
+  changeBomMode(settings.bommode);
+}
+
+function populateMetadata() {
+  document.getElementById("title").innerHTML = pcbdata.metadata.title;
+  document.getElementById("revision").innerHTML = "Rev: " + pcbdata.metadata.revision;
+  document.getElementById("company").innerHTML = pcbdata.metadata.company;
+  document.getElementById("filedate").innerHTML = pcbdata.metadata.date;
+  if (pcbdata.metadata.title != "") {
+    document.title = pcbdata.metadata.title + " BOM";
+  }
+  // Calculate board stats
+  var fp_f = 0, fp_b = 0, pads_f = 0, pads_b = 0, pads_th = 0;
+  for (var i = 0; i < pcbdata.footprints.length; i++) {
+    if (pcbdata.bom.skipped.includes(i)) continue;
+    var mod = pcbdata.footprints[i];
+    if (mod.layer == "F") {
+      fp_f++;
+    } else {
+      fp_b++;
+    }
+    for (var pad of mod.pads) {
+      if (pad.type == "th") {
+        pads_th++;
+      } else {
+        if (pad.layers.includes("F")) {
+          pads_f++;
+        }
+        if (pad.layers.includes("B")) {
+          pads_b++;
+        }
+      }
+    }
+  }
+  document.getElementById("stats-components-front").innerHTML = fp_f;
+  document.getElementById("stats-components-back").innerHTML = fp_b;
+  document.getElementById("stats-components-total").innerHTML = fp_f + fp_b;
+  document.getElementById("stats-groups-front").innerHTML = pcbdata.bom.F.length;
+  document.getElementById("stats-groups-back").innerHTML = pcbdata.bom.B.length;
+  document.getElementById("stats-groups-total").innerHTML = pcbdata.bom.both.length;
+  document.getElementById("stats-smd-pads-front").innerHTML = pads_f;
+  document.getElementById("stats-smd-pads-back").innerHTML = pads_b;
+  document.getElementById("stats-smd-pads-total").innerHTML = pads_f + pads_b;
+  document.getElementById("stats-th-pads").innerHTML = pads_th;
+  // Update version string
+  document.getElementById("github-link").innerHTML = "InteractiveHtmlBom&nbsp;" +
+    /^v\d+\.\d+/.exec(pcbdata.ibom_version)[0];
+}
+
+function changeBomLayout(layout) {
+  document.getElementById("bom-btn").classList.remove("depressed");
+  document.getElementById("lr-btn").classList.remove("depressed");
+  document.getElementById("tb-btn").classList.remove("depressed");
+  switch (layout) {
+    case 'bom-only':
+      document.getElementById("bom-btn").classList.add("depressed");
+      if (bomsplit) {
+        bomsplit.destroy();
+        bomsplit = null;
+        canvassplit.destroy();
+        canvassplit = null;
+      }
+      document.getElementById("frontcanvas").style.display = "none";
+      document.getElementById("backcanvas").style.display = "none";
+      document.getElementById("bot").style.height = "";
+      break;
+    case 'top-bottom':
+      document.getElementById("tb-btn").classList.add("depressed");
+      document.getElementById("frontcanvas").style.display = "";
+      document.getElementById("backcanvas").style.display = "";
+      document.getElementById("bot").style.height = "calc(100% - 80px)";
+      document.getElementById("bomdiv").classList.remove("split-horizontal");
+      document.getElementById("canvasdiv").classList.remove("split-horizontal");
+      document.getElementById("frontcanvas").classList.add("split-horizontal");
+      document.getElementById("backcanvas").classList.add("split-horizontal");
+      if (bomsplit) {
+        bomsplit.destroy();
+        bomsplit = null;
+        canvassplit.destroy();
+        canvassplit = null;
+      }
+      bomsplit = Split(['#bomdiv', '#canvasdiv'], {
+        sizes: [50, 50],
+        onDragEnd: resizeAll,
+        direction: "vertical",
+        gutterSize: 5
+      });
+      canvassplit = Split(['#frontcanvas', '#backcanvas'], {
+        sizes: [50, 50],
+        gutterSize: 5,
+        onDragEnd: resizeAll
+      });
+      break;
+    case 'left-right':
+      document.getElementById("lr-btn").classList.add("depressed");
+      document.getElementById("frontcanvas").style.display = "";
+      document.getElementById("backcanvas").style.display = "";
+      document.getElementById("bot").style.height = "calc(100% - 80px)";
+      document.getElementById("bomdiv").classList.add("split-horizontal");
+      document.getElementById("canvasdiv").classList.add("split-horizontal");
+      document.getElementById("frontcanvas").classList.remove("split-horizontal");
+      document.getElementById("backcanvas").classList.remove("split-horizontal");
+      if (bomsplit) {
+        bomsplit.destroy();
+        bomsplit = null;
+        canvassplit.destroy();
+        canvassplit = null;
+      }
+      bomsplit = Split(['#bomdiv', '#canvasdiv'], {
+        sizes: [50, 50],
+        onDragEnd: resizeAll,
+        gutterSize: 5
+      });
+      canvassplit = Split(['#frontcanvas', '#backcanvas'], {
+        sizes: [50, 50],
+        gutterSize: 5,
+        direction: "vertical",
+        onDragEnd: resizeAll
+      });
+  }
+  settings.bomlayout = layout;
+  writeStorage("bomlayout", layout);
+  changeCanvasLayout(settings.canvaslayout);
+}
+
+function changeBomMode(mode) {
+  document.getElementById("bom-grouped-btn").classList.remove("depressed");
+  document.getElementById("bom-ungrouped-btn").classList.remove("depressed");
+  document.getElementById("bom-netlist-btn").classList.remove("depressed");
+  switch (mode) {
+    case 'grouped':
+      document.getElementById("bom-grouped-btn").classList.add("depressed");
+      break;
+    case 'ungrouped':
+      document.getElementById("bom-ungrouped-btn").classList.add("depressed");
+      break;
+    case 'netlist':
+      document.getElementById("bom-netlist-btn").classList.add("depressed");
+  }
+  writeStorage("bommode", mode);
+  if (mode != settings.bommode) {
+    settings.bommode = mode;
+    bomSortFunction = null;
+    currentSortColumn = null;
+    currentSortOrder = null;
+    clearHighlightedFootprints();
+  }
+  populateBomTable();
+}
+
+function focusFilterField() {
+  focusInputField(document.getElementById("filter"));
+}
+
+function focusRefLookupField() {
+  focusInputField(document.getElementById("reflookup"));
+}
+
+function toggleBomCheckbox(bomrowid, checkboxnum) {
+  if (!bomrowid || checkboxnum > settings.checkboxes.length) {
+    return;
+  }
+  var bomrow = document.getElementById(bomrowid);
+  var checkbox = bomrow.childNodes[checkboxnum].childNodes[0];
+  checkbox.checked = !checkbox.checked;
+  checkbox.indeterminate = false;
+  checkbox.onchange();
+}
+
+function checkBomCheckbox(bomrowid, checkboxname) {
+  var checkboxnum = 0;
+  while (checkboxnum < settings.checkboxes.length &&
+    settings.checkboxes[checkboxnum].toLowerCase() != checkboxname.toLowerCase()) {
+    checkboxnum++;
+  }
+  if (!bomrowid || checkboxnum >= settings.checkboxes.length) {
+    return;
+  }
+  var bomrow = document.getElementById(bomrowid);
+  var checkbox = bomrow.childNodes[checkboxnum + 1].childNodes[0];
+  checkbox.checked = true;
+  checkbox.indeterminate = false;
+  checkbox.onchange();
+}
+
+function setBomCheckboxes(value) {
+  writeStorage("bomCheckboxes", value);
+  settings.checkboxes = value.split(",").filter((e) => e);
+  prepCheckboxes();
+  populateBomTable();
+  populateDarkenWhenCheckedOptions();
+}
+
+function setDarkenWhenChecked(value) {
+  writeStorage("darkenWhenChecked", value);
+  settings.darkenWhenChecked = value;
+  populateBomTable();
+}
+
+function prepCheckboxes() {
+  var table = document.getElementById("checkbox-stats");
+  while (table.childElementCount > 1) {
+    table.removeChild(table.lastChild);
+  }
+  if (settings.checkboxes.length) {
+    table.style.display = "";
+  } else {
+    table.style.display = "none";
+  }
+  for (var checkbox of settings.checkboxes) {
+    var tr = document.createElement("TR");
+    var td = document.createElement("TD");
+    td.innerHTML = checkbox;
+    tr.appendChild(td);
+    td = document.createElement("TD");
+    td.id = "checkbox-stats-" + checkbox;
+    var progressbar = document.createElement("div");
+    progressbar.classList.add("bar");
+    td.appendChild(progressbar);
+    var text = document.createElement("div");
+    text.classList.add("text");
+    td.appendChild(text);
+    tr.appendChild(td);
+    table.appendChild(tr);
+    updateCheckboxStats(checkbox);
+  }
+}
+
+function populateDarkenWhenCheckedOptions() {
+  var container = document.getElementById("darkenWhenCheckedContainer");
+
+  if (settings.checkboxes.length == 0) {
+    container.parentElement.style.display = "none";
+    return;
+  }
+
+  container.innerHTML = '';
+  container.parentElement.style.display = "inline-block";
+
+  function createOption(name, displayName) {
+    var id = "darkenWhenChecked-" + name;
+
+    var div = document.createElement("div");
+    div.classList.add("radio-container");
+
+    var input = document.createElement("input");
+    input.type = "radio";
+    input.name = "darkenWhenChecked";
+    input.value = name;
+    input.id = id;
+    input.onchange = () => setDarkenWhenChecked(name);
+    div.appendChild(input);
+
+    // Preserve the selected element when the checkboxes change
+    if (name == settings.darkenWhenChecked) {
+      input.checked = true;
+    }
+
+    var label = document.createElement("label");
+    label.innerHTML = displayName;
+    label.htmlFor = id;
+    div.appendChild(label);
+
+    container.appendChild(div);
+  }
+  createOption("", "None");
+  for (var checkbox of settings.checkboxes) {
+    createOption(checkbox, checkbox);
+  }
+}
+
+function updateCheckboxStats(checkbox) {
+  var checked = getStoredCheckboxRefs(checkbox).size;
+  var total = pcbdata.footprints.length - pcbdata.bom.skipped.length;
+  var percent = checked * 100.0 / total;
+  var td = document.getElementById("checkbox-stats-" + checkbox);
+  td.firstChild.style.width = percent + "%";
+  td.lastChild.innerHTML = checked + "/" + total + " (" + Math.round(percent) + "%)";
+}
+
+document.onkeydown = function(e) {
+  switch (e.key) {
+    case "n":
+      if (document.activeElement.type == "text") {
+        return;
+      }
+      if (currentHighlightedRowId !== null) {
+        checkBomCheckbox(currentHighlightedRowId, "placed");
+        highlightNextRow();
+        e.preventDefault();
+      }
+      break;
+    case "ArrowUp":
+      highlightPreviousRow();
+      e.preventDefault();
+      break;
+    case "ArrowDown":
+      highlightNextRow();
+      e.preventDefault();
+      break;
+    default:
+      break;
+  }
+  if (e.altKey) {
+    switch (e.key) {
+      case "f":
+        focusFilterField();
+        e.preventDefault();
+        break;
+      case "r":
+        focusRefLookupField();
+        e.preventDefault();
+        break;
+      case "z":
+        changeBomLayout("bom-only");
+        e.preventDefault();
+        break;
+      case "x":
+        changeBomLayout("left-right");
+        e.preventDefault();
+        break;
+      case "c":
+        changeBomLayout("top-bottom");
+        e.preventDefault();
+        break;
+      case "v":
+        changeCanvasLayout("F");
+        e.preventDefault();
+        break;
+      case "b":
+        changeCanvasLayout("FB");
+        e.preventDefault();
+        break;
+      case "n":
+        changeCanvasLayout("B");
+        e.preventDefault();
+        break;
+      default:
+        break;
+    }
+    if (e.key >= '1' && e.key <= '9') {
+      toggleBomCheckbox(currentHighlightedRowId, parseInt(e.key));
+    }
+  }
+}
+
+function hideNetlistButton() {
+  document.getElementById("bom-ungrouped-btn").classList.remove("middle-button");
+  document.getElementById("bom-ungrouped-btn").classList.add("right-most-button");
+  document.getElementById("bom-netlist-btn").style.display = "none";
+}
+
+window.onload = function(e) {
+  initUtils();
+  initRender();
+  initStorage();
+  initDefaults();
+  cleanGutters();
+  populateMetadata();
+  dbgdiv = document.getElementById("dbg");
+  bom = document.getElementById("bombody");
+  bomhead = document.getElementById("bomhead");
+  filter = "";
+  reflookup = "";
+  if (!("nets" in pcbdata)) {
+    hideNetlistButton();
+  }
+  initDone = true;
+  prepCheckboxes();
+  // Triggers render
+  changeBomLayout(settings.bomlayout);
+
+  // Users may leave fullscreen without touching the checkbox. Uncheck.
+  document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement)
+      document.getElementById('fullscreenCheckbox').checked = false;
+  });
+}
+
+window.onresize = resizeAll;
+window.matchMedia("print").addListener(resizeAll);
+
+///////////////////////////////////////////////
+
+///////////////////////////////////////////////
+ 
+///////////////////////////////////////////////
+  </script>
+</head>
+
+<body>
+<!-- USERHEADER -->
+<div id="topmostdiv" class="topmostdiv">
+  <div id="top">
+    <div style="float: right; height: 100%;">
+      <div class="hideonprint menu" style="float: right; top: 8px;">
+        <button class="menubtn"></button>
+        <div class="menu-content">
+          <label class="menu-label menu-label-top" style="width: calc(50% - 18px)">
+            <input id="darkmodeCheckbox" type="checkbox" onchange="setDarkMode(this.checked)">
+            Dark mode
+          </label><!-- This comment eats space! All of it!
+          --><label class="menu-label menu-label-top" style="width: calc(50% - 17px); border-left: 0;">
+            <input id="fullscreenCheckbox" type="checkbox" onchange="setFullscreen(this.checked)">
+            Full Screen
+          </label>
+          <label class="menu-label" style="width: calc(50% - 18px)">
+            <input id="fabricationCheckbox" type="checkbox" checked onchange="fabricationVisible(this.checked)">
+            Fab layer
+          </label><!-- This comment eats space! All of it!
+          --><label class="menu-label" style="width: calc(50% - 17px); border-left: 0;">
+            <input id="silkscreenCheckbox" type="checkbox" checked onchange="silkscreenVisible(this.checked)">
+            Silkscreen
+          </label>
+          <label class="menu-label" style="width: calc(50% - 18px)">
+            <input id="referencesCheckbox" type="checkbox" checked onchange="referencesVisible(this.checked)">
+            References
+          </label><!-- This comment eats space! All of it!
+          --><label class="menu-label" style="width: calc(50% - 17px); border-left: 0;">
+            <input id="valuesCheckbox" type="checkbox" checked onchange="valuesVisible(this.checked)">
+            Values
+          </label>
+          <div id="tracksAndZonesCheckboxes">
+            <label class="menu-label" style="width: calc(50% - 18px)">
+              <input id="tracksCheckbox" type="checkbox" checked onchange="tracksVisible(this.checked)">
+              Tracks
+            </label><!-- This comment eats space! All of it!
+            --><label class="menu-label" style="width: calc(50% - 17px); border-left: 0;">
+              <input id="zonesCheckbox" type="checkbox" checked onchange="zonesVisible(this.checked)">
+              Zones
+            </label>
+          </div>
+          <label class="menu-label" style="width: calc(50% - 18px)">
+            <input id="padsCheckbox" type="checkbox" checked onchange="padsVisible(this.checked)">
+            Pads
+          </label><!-- This comment eats space! All of it!
+          --><label class="menu-label" style="width: calc(50% - 17px); border-left: 0;">
+            <input id="dnpOutlineCheckbox" type="checkbox" checked onchange="dnpOutline(this.checked)">
+            DNP outlined
+          </label>
+          <label class="menu-label">
+            <input id="highlightpin1Checkbox" type="checkbox" onchange="setHighlightPin1(this.checked)">
+            Highlight first pin
+          </label>
+          <label class="menu-label">
+            <input id="dragCheckbox" type="checkbox" checked onchange="setRedrawOnDrag(this.checked)">
+            Continuous redraw on drag
+          </label>
+          <label class="menu-label">
+            <input id="crosshairCheckbox" type="checkbox" checked onchange="setShowCrosshair(this.checked)">
+            Show Crosshair
+          </label>
+          <label class="menu-label">
+            <span>Board rotation</span>
+            <span style="float: right"><span id="rotationDegree">0</span>&#176;</span>
+            <input id="boardRotation" type="range" min="-36" max="36" value="0" class="slider" oninput="setBoardRotation(this.value)">
+          </label>
+          <label class="menu-label">
+            <div style="margin-left: 5px">Bom checkboxes</div>
+            <input id="bomCheckboxes" class="menu-textbox" type=text
+                   oninput="setBomCheckboxes(this.value)">
+          </label>
+          <label class="menu-label">
+            <div style="margin-left: 5px">Darken when checked</div>
+            <div id="darkenWhenCheckedContainer"></div>
+          </label>
+          <label class="menu-label">
+            <span class="shameless-plug">
+              <span>Created using</span>
+              <a id="github-link" target="blank" href="https://github.com/openscopeproject/InteractiveHtmlBom">InteractiveHtmlBom</a>
+            </span>
+          </label>
+        </div>
+      </div>
+      <div class="button-container hideonprint"
+           style="float: right; position: relative; top: 8px">
+        <button id="fl-btn" class="left-most-button" onclick="changeCanvasLayout('F')"
+                title="Front only">F
+        </button>
+        <button id="fb-btn" class="middle-button" onclick="changeCanvasLayout('FB')"
+                title="Front and Back">FB
+        </button>
+        <button id="bl-btn" class="right-most-button" onclick="changeCanvasLayout('B')"
+                title="Back only">B
+        </button>
+      </div>
+      <div class="button-container hideonprint"
+           style="float: right; position: relative; top: 8px">
+        <button id="bom-btn" class="left-most-button" onclick="changeBomLayout('bom-only')"
+                title="BOM only"></button>
+        <button id="lr-btn" class="middle-button" onclick="changeBomLayout('left-right')"
+                title="BOM left, drawings right"></button>
+        <button id="tb-btn" class="right-most-button" onclick="changeBomLayout('top-bottom')"
+                title="BOM top, drawings bot"></button>
+      </div>
+      <div class="button-container hideonprint"
+           style="float: right; position: relative; top: 8px">
+        <button id="bom-grouped-btn" class="left-most-button" onclick="changeBomMode('grouped')"
+                title="Grouped BOM"></button>
+        <button id="bom-ungrouped-btn" class="middle-button" onclick="changeBomMode('ungrouped')"
+                title="Ungrouped BOM"></button>
+        <button id="bom-netlist-btn" class="right-most-button" onclick="changeBomMode('netlist')"
+                title="Netlist"></button>
+      </div>
+      <div class="hideonprint menu" style="float: right; top: 8px;">
+        <button class="statsbtn"></button>
+        <div class="menu-content">
+          <table class="stats">
+            <tbody>
+              <tr>
+                <td width="40%">Board stats</td>
+                <td>Front</td>
+                <td>Back</td>
+                <td>Total</td>
+              </tr>
+              <tr>
+                <td>Components</td>
+                <td id="stats-components-front">~</td>
+                <td id="stats-components-back">~</td>
+                <td id="stats-components-total">~</td>
+              </tr>
+              <tr>
+                <td>Groups</td>
+                <td id="stats-groups-front">~</td>
+                <td id="stats-groups-back">~</td>
+                <td id="stats-groups-total">~</td>
+              </tr>
+              <tr>
+                <td>SMD pads</td>
+                <td id="stats-smd-pads-front">~</td>
+                <td id="stats-smd-pads-back">~</td>
+                <td id="stats-smd-pads-total">~</td>
+              </tr>
+              <tr>
+                <td>TH pads</td>
+                <td colspan=3 id="stats-th-pads">~</td>
+              </tr>
+            </tbody>
+          </table>
+          <table class="stats">
+            <col width="40%"/><col />
+            <tbody id="checkbox-stats">
+              <tr>
+                <td colspan=2 style="border-top: 0">Checkboxes</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="hideonprint menu" style="float: right; top: 8px;">
+        <button class="iobtn"></button>
+        <div class="menu-content">
+          <div class="menu-label menu-label-top">
+            <div style="margin-left: 5px;">Save board image</div>
+            <div class="flexbox">
+              <input id="render-save-width" class="menu-textbox" type="text" value="1000" placeholder="Width"
+                  style="flex-grow: 1; width: 50px;" oninput="validateSaveImgDimension(this)">
+              <span>X</span>
+              <input id="render-save-height" class="menu-textbox" type="text" value="1000" placeholder="Height"
+                  style="flex-grow: 1; width: 50px;" oninput="validateSaveImgDimension(this)">
+            </div>
+            <label>
+              <input id="render-save-transparent" type="checkbox">
+              Transparent background
+            </label>
+            <div class="flexbox">
+              <button class="savebtn" onclick="saveImage('F')">Front</button>
+              <button class="savebtn" onclick="saveImage('B')">Back</button>
+            </div>
+          </div>
+          <div class="menu-label">
+            <span style="margin-left: 5px;">Config and checkbox state</span>
+            <div class="flexbox">
+              <button class="savebtn" onclick="saveSettings()">Export</button>
+              <button class="savebtn" onclick="loadSettings()">Import</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="fileinfodiv" style="overflow: auto;">
+      <table class="fileinfo">
+        <tbody>
+          <tr>
+            <td id="title" class="title" style="width: 70%">
+              Title
+            </td>
+            <td id="revision" class="title" style="width: 30%">
+              Revision
+            </td>
+          </tr>
+          <tr>
+            <td id="company">
+              Company
+            </td>
+            <td id="filedate">
+              Date
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div id="bot" class="split" style="height: calc(100% - 80px)">
+    <div id="bomdiv" class="split split-horizontal">
+      <div style="width: 100%">
+        <input id="reflookup" class="textbox searchbox reflookup hideonprint" type="text" placeholder="Ref lookup"
+               oninput="updateRefLookup(this.value)">
+        <input id="filter" class="textbox searchbox filter hideonprint" type="text" placeholder="Filter"
+               oninput="updateFilter(this.value)">
+        <div class="button-container hideonprint" style="float: left; margin: 0;">
+          <button id="copy" title="Copy bom table to clipboard"
+               onclick="copyToClipboard()"></button>
+        </div>
+      </div>
+      <div id="dbg"></div>
+      <table class="bom">
+        <thead id="bomhead">
+        </thead>
+        <tbody id="bombody">
+        </tbody>
+      </table>
+    </div>
+    <div id="canvasdiv" class="split split-horizontal">
+      <div id="frontcanvas" class="split" touch-action="none" style="overflow: hidden">
+        <div style="position: relative; width: 100%; height: 100%;">
+          <canvas id="F_bg" style="position: absolute; left: 0; top: 0; z-index: 0;"></canvas>
+          <canvas id="F_fab" style="position: absolute; left: 0; top: 0; z-index: 1;"></canvas>
+          <canvas id="F_slk" style="position: absolute; left: 0; top: 0; z-index: 2;"></canvas>
+          <canvas id="F_hl" style="position: absolute; left: 0; top: 0; z-index: 3;"></canvas>
+        </div>
+      </div>
+      <div id="backcanvas" class="split" touch-action="none" style="overflow: hidden">
+        <div style="position: relative; width: 100%; height: 100%;">
+          <canvas id="B_bg" style="position: absolute; left: 0; top: 0; z-index: 0;"></canvas>
+          <canvas id="B_fab" style="position: absolute; left: 0; top: 0; z-index: 1;"></canvas>
+          <canvas id="B_slk" style="position: absolute; left: 0; top: 0; z-index: 2;"></canvas>
+          <canvas id="B_hl" style="position: absolute; left: 0; top: 0; z-index: 3;"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- USERFOOTER -->
+</body>
+
+</html>
